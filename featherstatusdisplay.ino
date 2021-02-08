@@ -1,5 +1,8 @@
+#include "test.h"
+
 void setup()
 {
+  TEST_DEF;
   pinMode(LED_BUILTIN, OUTPUT);
 }
 

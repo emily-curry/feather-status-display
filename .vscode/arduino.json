@@ -1,6 +1,7 @@
 {
-    "sketch": "featherstatusdisplay.ino",
-    "board": "adafruit:nrf52:feather52840",
-    "configuration": "softdevice=s140v6,debug=l0",
-    "port": "COM5"
+  "sketch": "featherstatusdisplay.ino",
+  "board": "adafruit:nrf52:feather52840",
+  "configuration": "softdevice=s140v6,debug=l0",
+  "port": "COM5",
+  "output": "target"
 }
