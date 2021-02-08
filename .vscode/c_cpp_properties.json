@@ -1,0 +1,76 @@
+{
+    "enableConfigurationSquiggles": true,
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0/variants/feather_nrf52840_express",
+                "C:\\Program Files (x86)\\Arduino\\libraries\\**",
+                "${nrf5}/cmsis/Core/Include",
+                "${nrf5}/nordic",
+                "${nrf5}/nordic/nrfx",
+                "${nrf5}/nordic/nrfx/hal",
+                "${nrf5}/nordic/nrfx/mdk",
+                "${nrf5}/nordic/nrfx/soc",
+                "${nrf5}/nordic/nrfx/drivers/include",
+                "${nrf5}/nordic/nrfx/drivers/src",
+                "${nrf5}/nordic/softdevice/s140_nrf52_6.1.1_API/include",
+                "${nrf5}/nordic/softdevice/s140_nrf52_6.1.1_API/include/nrf52",
+                "${nrf5}/freertos/Source/include",
+                "${nrf5}/freertos/config",
+                "${nrf5}/freertos/portable/GCC/nrf52",
+                "${nrf5}/freertos/portable/CMSIS/nrf52",
+                "${nrf5}/sysview/SEGGER",
+                "${nrf5}/sysview/Config",
+                "${nrf5}/TinyUSB",
+                "${nrf5}/TinyUSB/Adafruit_TinyUSB_ArduinoCore",
+                "${nrf5}/TinyUSB/Adafruit_TinyUSB_ArduinoCore/tinyusb/src",
+                "${nrf5}",
+                "${tools}/lib/gcc/arm-none-eabi/9.2.1/include",
+                "${tools}/arm-none-eabi/9.2.1/include",
+                "C:\\Users\\Shurelia\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\nrf52\\0.21.0\\**",
+                "C:\\Users\\Shurelia\\Documents\\Arduino\\libraries\\**",
+                "C:\\Users\\Shurelia\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\**"
+            ],
+            "forcedInclude": [
+                "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0/variants/feather_nrf52840_express",
+                "${nrf5}/Arduino.h"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceRoot}",
+                    "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0"
+                ]
+            },
+            "defines": [
+                "F_CPU=64000000",
+                "ARDUINO_NRF52840_FEATHER",
+                "ARDUINO=1.8.13",
+                "SOFTDEVICE_PRESENT",
+                "ARDUINO_NRF52_ADAFRUIT",
+                "ARDUINO_ARCH_NRF52",
+                "NRF52_SERIES",
+                "LFS_NAME_MAX=64",
+                "CFG_SYSVIEW=0",
+                "CFG_LOGGER=1",
+                "CFG_DEBUG=0",
+                "NRF52840_XXAA",
+                "USBCON",
+                "USE_TINYUSB",
+                "USB_VID=0x239A",
+                "USB_PID=0x8029",
+                "USB_MANUFACTURER=Adafruit LLC",
+                "USB_PRODUCT=Feather nRF52840 Express"
+            ],
+            "intelliSenseMode": "windows-gcc-arm",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++11",
+            "compilerPath": "${tools}/bin/arm-none-eabi-g++.exe"
+        }
+    ],
+    "version": 4,
+    "env": {
+        "nrf5": "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0/cores/nRF5",
+        "tools": "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4"
+    }
+}
