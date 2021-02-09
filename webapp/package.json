@@ -1,0 +1,15 @@
+{
+  "name": "webapp",
+  "version": "1.0.0",
+  "description": "playground web app for sending messages via bluetooth, only for testing/dev purposes",
+  "scripts": {
+    "start": "snowpack dev"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/web-bluetooth": "^0.0.9",
+    "sirv-cli": "^1.0.0",
+    "snowpack": "^3.0.11"
+  }
+}

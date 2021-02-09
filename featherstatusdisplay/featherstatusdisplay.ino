@@ -39,8 +39,8 @@ void startBle(void)
   Bluefruit.setName("Emily's Cool Thing");
 
   // Set the connect/disconnect callback handlers
-  // Bluefruit.Periph.setConnectCallback(connect_callback);
-  // Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
+  Bluefruit.Periph.setConnectCallback(connect_callback);
+  Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
 
   Serial.println("Configuring the Device Information Service");
   bledis.setManufacturer("Emily's Cool Stuff.com");
@@ -50,6 +50,33 @@ void startBle(void)
   Serial.println("Configuring the Battery Service");
   blebas.begin();
   blebas.write(100); // Is this correct? Will it auto update?
+}
+
+void connect_callback(uint16_t conn_handle)
+{
+  // Get the reference to current connection
+  BLEConnection *connection = Bluefruit.Connection(conn_handle);
+
+  char central_name[32] = {0};
+  connection->getPeerName(central_name, sizeof(central_name));
+
+  Serial.print("Connected to ");
+  Serial.println(central_name);
+}
+
+/**
+ * Callback invoked when a connection is dropped
+ * @param conn_handle connection where this event happens
+ * @param reason is a BLE_HCI_STATUS_CODE which can be found in ble_hci.h
+ */
+void disconnect_callback(uint16_t conn_handle, uint8_t reason)
+{
+  (void)conn_handle;
+  (void)reason;
+
+  Serial.print("Disconnected, reason = 0x");
+  Serial.println(reason, HEX);
+  Serial.println("Advertising! Again!");
 }
 
 void startAdv(void)

@@ -1,0 +1,10 @@
+#controls-container {
+  display: flex;
+  justify-content: space-around;
+}
+
+#controls-container > div {
+  min-width: 300px;
+  border: solid black 1px;
+  padding: 0 1em 1em 1em;
+}
