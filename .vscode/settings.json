@@ -1,5 +1,11 @@
 {
-  "arduino.enableUSBDetection": false,
-  "arduino.skipHeaderProvider": true,
-  "prettier.requireConfig": false
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "featherstatusdisplay": true,
+    "webapp": true
+  }
 }
