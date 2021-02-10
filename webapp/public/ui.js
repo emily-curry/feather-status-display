@@ -1,11 +1,9 @@
-/// <reference path="types.d.ts" />
-
-import { controlPanel } from './control-panel.js';
-import { deviceManager } from './device-manager.js';
+import { controlPanelUI } from './control-panel-ui.js';
+import { deviceManagerUI } from './device-manager-ui.js';
 import { unwrap } from './util.js';
 
-deviceManager.init();
-controlPanel.init();
+deviceManagerUI.init();
+controlPanelUI.init();
 
 if (import.meta.hot) {
   let dirty = false;

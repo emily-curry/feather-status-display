@@ -9,7 +9,6 @@
   "license": "ISC",
   "devDependencies": {
     "@types/web-bluetooth": "^0.0.9",
-    "sirv-cli": "^1.0.0",
     "snowpack": "^3.0.11"
   }
 }

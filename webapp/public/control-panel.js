@@ -1,36 +1,35 @@
+import { BLE_SERVICE_STATUS } from './constants.js';
 import { DeviceManager, deviceManager } from './device-manager.js';
-import { unwrap } from './util.js';
 
 class ControlPanel {
-  _controls = document.getElementById('controls');
-  get controls() {
-    return unwrap(this._controls);
-  }
-  _displayTitle = document.getElementById('controls-title');
-  get displayTitle() {
-    return unwrap(this._displayTitle);
-  }
+  /** @type {Promise<BluetoothRemoteGATTServer> | undefined} */
+  #server = undefined;
 
   init() {
-    this.controls.hidden = true;
     deviceManager.addEventListener(
       DeviceManager.EVENT_DEVICE_CONNECTED,
-      this.#onDeviceConnected,
+      this.getStatusService,
     );
     deviceManager.addEventListener(
       DeviceManager.EVENT_DEVICE_DISCONNECTED,
-      this.#onDeviceDisconnected,
+      this.#cleanup,
     );
   }
 
-  #onDeviceConnected = async () => {
-    this.controls.hidden = false;
-    const device = deviceManager.device;
-    this.displayTitle.innerText = `Device: ${device.name}`;
+  getServer() {
+    if (this.#server === undefined) {
+      this.#server = deviceManager.getGATTServer();
+    }
+    return this.#server;
+  }
+
+  getStatusService = async () => {
+    const server = await this.getServer();
+    return await server.getPrimaryService(BLE_SERVICE_STATUS);
   };
 
-  #onDeviceDisconnected = async () => {
-    this.controls.hidden = true;
+  #cleanup = () => {
+    this.#server = undefined;
   };
 }
 
