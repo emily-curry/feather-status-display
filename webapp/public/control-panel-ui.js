@@ -60,8 +60,7 @@ class ControlPanelUI {
     const chr = await svc.getCharacteristic(BLE_CHR_STATUS_CODE);
     //@ts-ignore
     const output = parseInt(this.statusCodeInput.value);
-    console.log(output);
-    Uint8Array.of();
+    console.log('Writing status code:', output);
     await chr.writeValueWithoutResponse(new Uint8Array([output]));
   };
 }

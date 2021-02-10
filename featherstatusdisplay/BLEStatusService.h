@@ -5,13 +5,20 @@
 
 #include "BLECharacteristic.h"
 #include "BLEService.h"
+#include "StatusCode.h"
 
 class BLEStatusService : public BLEService
 {
 protected:
+  static StatusCode _code;
+  static void setStatusCode(StatusCode code);
+
   BLECharacteristic _statusCode;
 
 public:
+  static StatusCode getStatusCode();
+  static void writeCallback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
+
   BLEStatusService(void);
 
   virtual err_t begin(void);

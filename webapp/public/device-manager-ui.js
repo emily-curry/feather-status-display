@@ -1,4 +1,3 @@
-import { BLE_SERVICE_STATUS } from './constants.js';
 import { DeviceManager, deviceManager } from './device-manager.js';
 import { unwrap } from './util.js';
 
@@ -16,21 +15,25 @@ class DeviceManagerUI {
     );
     deviceManager.addEventListener(
       DeviceManager.EVENT_DEVICE_DISCONNECTED,
-      this.#setButtonText,
+      this.#cleanup,
     );
-    this.#setButtonText();
   }
 
   #setButtonText = () => {
-    if (deviceManager._device) {
+    try {
+      const x = deviceManager.device;
       this.bleButton.innerText = 'Stop BLE';
-    } else {
+    } catch (e) {
       this.bleButton.innerText = 'Start BLE';
     }
   };
 
   #onBleToggleClick = async () => {
     await deviceManager.toggleConnect();
+  };
+
+  #cleanup = () => {
+    this.#setButtonText();
   };
 }
 

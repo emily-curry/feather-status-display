@@ -5,7 +5,9 @@
     {
       "name": "Win32",
       "includePath": [
+        "${workspaceRoot}",
         "C:\\Program Files (x86)\\Arduino\\libraries\\**",
+        "${env:USERPROFILE}/Documents/Arduino/libraries/Adafruit_NeoPixel",
         "${variants}/feather_nrf52840_express",
         "${libraries}/Bluefruit52Lib/src",
         "${nrf5}/cmsis/Core/Include",
@@ -38,13 +40,14 @@
       "browse": {
         "path": [
           "${workspaceRoot}",
+          "${env:USERPROFILE}/Documents/Arduino/libraries",
           "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0"
         ]
       },
       "defines": [
         "F_CPU=64000000",
         "ARDUINO_NRF52840_FEATHER",
-        "ARDUINO=1.8.13",
+        "ARDUINO=18130",
         "SOFTDEVICE_PRESENT",
         "ARDUINO_NRF52_ADAFRUIT",
         "ARDUINO_ARCH_NRF52",
@@ -63,7 +66,7 @@
       ],
       "intelliSenseMode": "windows-gcc-arm",
       "cStandard": "gnu11",
-      "cppStandard": "gnu++11",
+      "cppStandard": "gnu++14",
       "compilerPath": "${tools}/bin/arm-none-eabi-g++.exe"
     }
   ],

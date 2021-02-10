@@ -8,13 +8,21 @@ export class DeviceManager extends EventTarget {
   /**
    * @type {BluetoothDevice | undefined}
    */
-  _device = undefined;
+  #device = undefined;
   /**
    * @returns {BluetoothDevice} The currently connected bluetooth device
    * @throws if no device connected
    */
   get device() {
-    return unwrap(this._device);
+    return unwrap(this.#device);
+  }
+
+  /**
+   * @type {BluetoothRemoteGATTServer | undefined}
+   */
+  #server = undefined;
+  get server() {
+    return unwrap(this.#server);
   }
 
   init() {}
@@ -32,16 +40,17 @@ export class DeviceManager extends EventTarget {
   };
 
   toggleConnect = async () => {
-    if (this._device) {
-      this.#setDevice(undefined);
-      this.dispatchEvent(new Event(DeviceManager.EVENT_DEVICE_DISCONNECTED));
+    if (this.#device) {
+      this.server.disconnect();
     } else {
       try {
         const device = await navigator.bluetooth.requestDevice({
           filters: [{ services: [BLE_SERVICE_STATUS] }],
           optionalServices: ['battery_service'],
         });
-        this.#setDevice(device);
+        this.#device = device;
+        this.#server = await device.gatt?.connect();
+        this.device.ongattserverdisconnected = this.#onDisconnected;
         this.dispatchEvent(new Event(DeviceManager.EVENT_DEVICE_CONNECTED));
       } catch (e) {
         console.error(e);
@@ -49,12 +58,10 @@ export class DeviceManager extends EventTarget {
     }
   };
 
-  /**
-   * @param {BluetoothDevice | undefined} device
-   */
-  #setDevice = (device) => {
-    console.debug('device changed:', device);
-    this._device = device;
+  #onDisconnected = () => {
+    this.#device = undefined;
+    this.#server = undefined;
+    this.dispatchEvent(new Event(DeviceManager.EVENT_DEVICE_DISCONNECTED));
   };
 }
 

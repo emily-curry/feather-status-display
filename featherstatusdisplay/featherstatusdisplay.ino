@@ -1,5 +1,6 @@
 #include "bluefruit.h"
 #include "BLEStatusService.h"
+#include "PixelController.h"
 
 #define STATUS_DISPLAY_WAIT_SERIAL
 
@@ -16,7 +17,8 @@ void setup()
     delay(10); // for nrf52840 with native usb
 
 #endif // STATUS_DISPLAY_WAIT_SERIAL
-  pinMode(LED_BUILTIN, OUTPUT);
+
+  PixelController::begin();
   startBle();
   statusSvc.begin();
   startAdv();
@@ -24,10 +26,6 @@ void setup()
 
 void loop()
 {
-  digitalWrite(LED_BUILTIN, HIGH); // turn the LED on (HIGH is the voltage level)
-  delay(1000);                     // wait for a second
-  digitalWrite(LED_BUILTIN, LOW);  // turn the LED off by making the voltage LOW
-  delay(1000);                     // wait for a second
 }
 
 void startBle(void)
@@ -85,7 +83,7 @@ void startAdv(void)
   Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
   Bluefruit.Advertising.addTxPower();
 
-  // Include HRM Service UUID
+  // Include Status Service
   Bluefruit.Advertising.addService(statusSvc);
 
   // Include Name
