@@ -1,10 +1,14 @@
 #include "bluefruit.h"
+#include "SDCard.h"
 #include "BLEStatusService.h"
+#include "BLEImageService.h"
 #include "PixelController.h"
+#include "DisplayController.h"
 
 #define STATUS_DISPLAY_WAIT_SERIAL
 
 BLEStatusService statusSvc = BLEStatusService();
+BLEImageService imageSvc = BLEImageService();
 BLEDis bledis = BLEDis();
 BLEBas blebas = BLEBas();
 
@@ -18,9 +22,12 @@ void setup()
 
 #endif // STATUS_DISPLAY_WAIT_SERIAL
 
+  SDCard::begin();
+  DisplayController::begin();
   PixelController::begin();
   startBle();
   statusSvc.begin();
+  imageSvc.begin();
   startAdv();
 }
 

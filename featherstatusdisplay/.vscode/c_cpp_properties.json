@@ -1,15 +1,26 @@
 {
   "enableConfigurationSquiggles": true,
   "configurations": [
-    { "name": "NO (Workaround for config generation that I don't want)" },
+    {
+      "name": "NO (Workaround for config generation that I don't want)"
+    },
     {
       "name": "Win32",
       "includePath": [
         "${workspaceRoot}",
-        "C:\\Program Files (x86)\\Arduino\\libraries\\**",
-        "${env:USERPROFILE}/Documents/Arduino/libraries/Adafruit_NeoPixel",
+        "${lib}/Adafruit_NeoPixel",
+        "${lib}/Adafruit_EPD/src",
+        "${lib}/Adafruit_EPD/src/drivers",
+        "${lib}/Adafruit_EPD/src/panels",
+        "${lib}/Adafruit_GFX_Library",
+        "${lib}/Adafruit_ImageReader_Library",
+        "${lib}/Adafruit_BusIO",
+        "${lib}/Adafruit_SPIFlash/src",
+        "${lib}/Adafruit_SPIFlash/src/spi",
+        "${lib}/SdFat_-_Adafruit_Fork/src",
+        "${lib}/SdFat_-_Adafruit_Fork/src/utility",
         "${variants}/feather_nrf52840_express",
-        "${libraries}/Bluefruit52Lib/src",
+        "${adalib}/**",
         "${nrf5}/cmsis/Core/Include",
         "${nrf5}/nordic",
         "${nrf5}/nordic/nrfx",
@@ -33,14 +44,11 @@
         "${tools}/lib/gcc/arm-none-eabi/9.2.1/include",
         "${tools}/arm-none-eabi/9.2.1/include"
       ],
-      "forcedInclude": [
-        "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0/variants/feather_nrf52840_express",
-        "${nrf5}/Arduino.h"
-      ],
+      "forcedInclude": ["${variants}/feather_nrf52840_express"],
       "browse": {
         "path": [
           "${workspaceRoot}",
-          "${env:USERPROFILE}/Documents/Arduino/libraries",
+          "${lib}",
           "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0"
         ]
       },
@@ -75,6 +83,8 @@
     "nrf5": "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0/cores/nRF5",
     "variants": "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0/variants",
     "tools": "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4",
-    "libraries": "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0/libraries"
+    "corelib": "${env:programfiles(x86)}/Arduino/libraries",
+    "lib": "${env:USERPROFILE}/Documents/Arduino/libraries",
+    "adalib": "${env:LOCALAPPDATA}/Arduino15/packages/adafruit/hardware/nrf52/0.21.0/libraries"
   }
 }

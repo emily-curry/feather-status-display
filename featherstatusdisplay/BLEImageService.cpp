@@ -1,6 +1,6 @@
 #include "BLEImageService.h"
 
-BLEImageService::BLEImageService(void) : BLEService(UUID16_SVC_IMG), _battery(UUID16_CHR_HEART_RATE_MEASUREMENT)
+BLEImageService::BLEImageService(void) : BLEService(UUID16_SVC_IMAGE), _imageWriter(UUID16_CHR_IMAGE_WRITER), _imageControl(UUID16_CHR_IMAGE_CONTROL)
 {
 }
 
