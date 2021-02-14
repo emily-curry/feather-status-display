@@ -38,6 +38,7 @@ void loop()
 void startBle(void)
 {
   Serial.println("Initialize the Bluefruit module...");
+  Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
   Bluefruit.begin();
 
   Serial.println("Setting Device Name...");
@@ -46,6 +47,7 @@ void startBle(void)
   // Set the connect/disconnect callback handlers
   Bluefruit.Periph.setConnectCallback(connect_callback);
   Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
+  Bluefruit.Periph.setConnInterval(6, 12); // 7.5 - 15 ms
 
   Serial.println("Configuring the Device Information Service");
   bledis.setManufacturer("Emily's Cool Stuff.com");
@@ -60,10 +62,28 @@ void startBle(void)
 void connect_callback(uint16_t conn_handle)
 {
   // Get the reference to current connection
-  BLEConnection *connection = Bluefruit.Connection(conn_handle);
+  BLEConnection *conn = Bluefruit.Connection(conn_handle);
 
   char central_name[32] = {0};
-  connection->getPeerName(central_name, sizeof(central_name));
+  conn->getPeerName(central_name, sizeof(central_name));
+
+  // request PHY changed to 2MB
+  Serial.println("Request to change PHY");
+  conn->requestPHY();
+
+  // request to update data length
+  Serial.println("Request to change Data Length");
+  conn->requestDataLengthUpdate();
+
+  // request mtu exchange
+  Serial.println("Request to change MTU");
+  conn->requestMtuExchange(247);
+
+  // request connection interval of 7.5 ms
+  //conn->requestConnectionParameter(6); // in unit of 1.25
+
+  // delay a bit for all the request to complete
+  delay(1000);
 
   Serial.print("Connected to ");
   Serial.println(central_name);
@@ -107,7 +127,7 @@ void startAdv(void)
    */
   Bluefruit.Advertising.restartOnDisconnect(true);
   Bluefruit.Advertising.setInterval(32, 244); // in unit of 0.625 ms
-  Bluefruit.Advertising.setFastTimeout(10);   // number of seconds in fast mode
+  Bluefruit.Advertising.setFastTimeout(30);   // number of seconds in fast mode
   Bluefruit.Advertising.start(0);             // 0 = Don't stop advertising after n seconds
   Serial.println("\nAdvertising!");
 }

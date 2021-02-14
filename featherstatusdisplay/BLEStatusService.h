@@ -12,16 +12,15 @@ class BLEStatusService : public BLEService
 protected:
   static StatusCode _code;
   static void setStatusCode(StatusCode code);
+  static void writeCallback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
 
   BLECharacteristic _statusCode;
 
 public:
-  static StatusCode getStatusCode();
-  static void writeCallback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
-
   BLEStatusService(void);
 
   virtual err_t begin(void);
+  static StatusCode getStatusCode();
 };
 
 #endif // BLE_SVC_STATUS

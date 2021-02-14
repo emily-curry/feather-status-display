@@ -1,5 +1,6 @@
 #include "BLEStatusService.h"
 #include "PixelController.h"
+#include "DisplayController.h"
 
 StatusCode BLEStatusService::_code = StatusCode::STATUS_UNKNOWN;
 
@@ -33,33 +34,12 @@ void BLEStatusService::writeCallback(uint16_t conn_hdl, BLECharacteristic *chr, 
   BLEStatusService::setStatusCode(toStatusCode(code));
 }
 
-void setPixelForStatusCode(StatusCode code)
-{
-  switch (code)
-  {
-  case STATUS_AVAILABLE:
-    PixelController::setColor(0, 255, 0);
-    break;
-  case STATUS_BUSY:
-    PixelController::setColor(255, 255, 0);
-    break;
-  case STATUS_DND:
-    PixelController::setColor(255, 0, 0);
-    break;
-  case STATUS_OFFLINE:
-    PixelController::off();
-    break;
-  case STATUS_UNKNOWN:
-  default:
-    PixelController::setColor(255, 0, 255);
-    break;
-  }
-}
-
 void BLEStatusService::setStatusCode(StatusCode code)
 {
+  PixelController::setBusyRead();
   Serial.print("Status code set: ");
   Serial.println(code);
   BLEStatusService::_code = code;
-  setPixelForStatusCode(code);
+  DisplayController::displayCode(code);
+  PixelController::off();
 }

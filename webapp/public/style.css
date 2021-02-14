@@ -8,3 +8,9 @@
   border: solid black 1px;
   padding: 0 1em 1em 1em;
 }
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.5em;
+}

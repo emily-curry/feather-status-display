@@ -10,6 +10,9 @@
 class BLEImageService : public BLEService
 {
 protected:
+  static void writerCallback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
+  static void controlCallback(uint16_t conn_hdl, BLECharacteristic *chr, uint8_t *data, uint16_t len);
+
   BLECharacteristic _imageWriter;
   BLECharacteristic _imageControl;
 

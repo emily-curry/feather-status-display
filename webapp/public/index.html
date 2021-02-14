@@ -16,11 +16,31 @@
       <div id="controls-container">
         <div id="controls-status">
           <h3>Controls: Status</h3>
-          <span id="status-chr-code"><label>Status Code</label><input type="number" id="status-chr-code-input"></input><button id="status-chr-code-button" disabled>Write</button></span>
+          <span id="status-chr-code" class="row"
+            ><label>Status Code</label
+            ><input type="number" id="status-chr-code-input"
+          /></span>
+          <span class="row"
+            ><button id="status-chr-code-button" disabled>
+              Update Status
+            </button></span
+          >
         </div>
         <div id="controls-image">
           <h3>Controls: Image</h3>
-          <span>whew</span>
+          <span id="image-status-code" class="row"
+            ><label>Status Code</label
+            ><input type="number" id="image-status-code-input"
+          /></span>
+          <span class="row"
+            ><label>Bitmap Image</label
+            ><input id="image-data-input" type="file" accept=".bmp"
+          /></span>
+          <span class="row"
+            ><button id="image-status-code-button" disabled>
+              Write Image
+            </button></span
+          >
         </div>
       </div>
     </div>

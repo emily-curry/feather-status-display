@@ -18,6 +18,7 @@ export const getServiceName = (uuid) => {
  * @returns {T}
  */
 export const unwrap = (i) => {
-  if (!i) throw new Error('Could not unwrap, value is null');
+  if (i === null || i === undefined)
+    throw new Error('Could not unwrap, value is null');
   return i;
 };

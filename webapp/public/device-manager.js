@@ -1,4 +1,4 @@
-import { BLE_SERVICE_STATUS } from './constants.js';
+import { BLE_SERVICE_STATUS, UUID16_SVC_IMAGE } from './constants.js';
 import { unwrap } from './util.js';
 
 export class DeviceManager extends EventTarget {
@@ -46,7 +46,7 @@ export class DeviceManager extends EventTarget {
       try {
         const device = await navigator.bluetooth.requestDevice({
           filters: [{ services: [BLE_SERVICE_STATUS] }],
-          optionalServices: ['battery_service'],
+          optionalServices: ['battery_service', UUID16_SVC_IMAGE],
         });
         this.#device = device;
         this.#server = await device.gatt?.connect();
