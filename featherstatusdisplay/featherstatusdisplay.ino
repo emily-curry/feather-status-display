@@ -5,7 +5,8 @@
 #include "PixelController.h"
 #include "DisplayController.h"
 
-#define STATUS_DISPLAY_WAIT_SERIAL
+// #define STATUS_DISPLAY_WAIT_SERIAL
+// #define PIXEL_ENABLE
 
 BLEStatusService statusSvc = BLEStatusService();
 BLEImageService imageSvc = BLEImageService();

@@ -5,20 +5,19 @@ boolean PixelController::isError = false;
 
 void PixelController::begin()
 {
+#ifdef PIXEL_ENABLE
   PixelController::_pixel.begin();
   PixelController::_pixel.setBrightness(16);
+#endif
 }
 
 void PixelController::setColor(uint8_t red, uint8_t green, uint8_t blue)
 {
-  if (PixelController::isError)
-  {
-    return;
-  }
-
+#ifdef PIXEL_ENABLE
   PixelController::_pixel.setBrightness(16);
   PixelController::_pixel.setPixelColor(0, red, green, blue);
   PixelController::_pixel.show();
+#endif
 }
 
 void PixelController::setBusyRead()
@@ -45,11 +44,8 @@ void PixelController::setSuccess()
 
 void PixelController::off()
 {
-  if (PixelController::isError)
-  {
-    return;
-  }
-
-  PixelController::_pixel.setPixelColor(0, 0, 0, 0);
+#ifdef PIXEL_ENABLE
+  PixelController::_pixel.clear();
   PixelController::_pixel.show();
+#endif
 }
