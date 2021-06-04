@@ -3,12 +3,11 @@
 
 /** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
+  extends: 'electron-snowpack/config/snowpack.js',
   mount: {
     public: { url: '/', resolve: false },
   },
-  plugins: [
-    /* ... */
-  ],
+  plugins: ['@snowpack/plugin-react-refresh'],
   packageOptions: {
     /* ... */
   },
