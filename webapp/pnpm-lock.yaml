@@ -6,7 +6,7 @@ specifiers:
   '@types/react-dom': ^17.0.6
   '@types/snowpack-env': ^2.3.3
   '@types/web-bluetooth': ^0.0.9
-  electron: 12.0.5
+  electron: 11.3.0
   electron-builder: ^22.10.5
   electron-snowpack: ^0.11.0
   npm-run-all: ^4.1.5
@@ -25,9 +25,9 @@ devDependencies:
   '@types/react-dom': 17.0.6
   '@types/snowpack-env': 2.3.3
   '@types/web-bluetooth': 0.0.9
-  electron: 12.0.5
+  electron: 11.3.0
   electron-builder: 22.10.5
-  electron-snowpack: 0.11.0_electron@12.0.5+typescript@4.3.2
+  electron-snowpack: 0.11.0_electron@11.3.0+typescript@4.3.2
   npm-run-all: 4.1.5
   snowpack: 3.5.4
   typescript: 4.3.2
@@ -404,8 +404,8 @@ packages:
     dev: true
     optional: true
 
-  /@types/node/14.17.2:
-    resolution: {integrity: sha512-sld7b/xmFum66AAKuz/rp/CUO8+98fMpyQ3SBfzzBNGMd/1iHBTAg9oyAvcYlAj46bpc74r91jSw2iFdnx29nw==}
+  /@types/node/12.20.15:
+    resolution: {integrity: sha512-F6S4Chv4JicJmyrwlDkxUdGNSplsQdGwp1A0AJloEVDirWdZOAiRHhovDlsFkKUrquUXhz1imJhXHsf59auyAg==}
     dev: true
 
   /@types/node/15.12.0:
@@ -1286,7 +1286,7 @@ packages:
       - supports-color
     dev: true
 
-  /electron-snowpack/0.11.0_electron@12.0.5+typescript@4.3.2:
+  /electron-snowpack/0.11.0_electron@11.3.0+typescript@4.3.2:
     resolution: {integrity: sha512-ypQU2uJN9NUBPg8Px8A9LoCruAb5pnd+j+l6GQO73NOfhmVzjVKJ9c+ZC542mUBmhRUhedWX/Sq8m7tAicZZ4A==}
     hasBin: true
     peerDependencies:
@@ -1299,7 +1299,7 @@ packages:
       commander: 7.2.0
       dotenv: 8.6.0
       dotenv-expand: 5.1.0
-      electron: 12.0.5
+      electron: 11.3.0
       esbuild: 0.11.23
       execa: 5.1.0
       glob: 7.1.7
@@ -1314,14 +1314,14 @@ packages:
     resolution: {integrity: sha512-+K1vnBc08GNYxCWwdRe9o3Ml30DhsNyK/qIl/NE1Dic+qCy9ZREcqGNiV4jiLiAdALK1DUG3pakJHGkJUd9QQw==}
     dev: true
 
-  /electron/12.0.5:
-    resolution: {integrity: sha512-z0xYB3sPr0qZcDrHUUWqooPKe3yUzBDxQcgQe3f2TLstA84JIFXBoaIJCPh/fJW0+JdF/ZFVeK2SNgLhYtRV+Q==}
+  /electron/11.3.0:
+    resolution: {integrity: sha512-MhdS0gok3wZBTscLBbYrOhLaQybCSAfkupazbK1dMP5c+84eVMxJE/QGohiWQkzs0tVFIJsAHyN19YKPbelNrQ==}
     engines: {node: '>= 8.6'}
     hasBin: true
     requiresBuild: true
     dependencies:
       '@electron/get': 1.12.4
-      '@types/node': 14.17.2
+      '@types/node': 12.20.15
       extract-zip: 1.7.0
     transitivePeerDependencies:
       - supports-color

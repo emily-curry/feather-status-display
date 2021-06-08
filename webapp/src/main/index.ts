@@ -1,6 +1,8 @@
 import { app, BrowserWindow } from 'electron';
 import { getAssetURL } from 'electron-snowpack';
 
+app.commandLine.appendSwitch('enable-experimental-web-platform-features');
+
 let mainWindow: BrowserWindow | null | undefined;
 
 function createMainWindow(): BrowserWindow {
@@ -23,8 +25,28 @@ function createMainWindow(): BrowserWindow {
     });
   });
 
+  window.webContents.on(
+    'select-bluetooth-device',
+    (event, deviceList, callback) => {
+      event.preventDefault();
+      const result = deviceList.find((device) => {
+        return device.deviceName?.toLocaleLowerCase()?.includes('emily');
+      });
+      if (!result) {
+        callback('');
+      } else {
+        callback(result.deviceId);
+      }
+    },
+  );
+
   return window;
 }
+
+// create main BrowserWindow when electron is ready
+app.on('ready', (): void => {
+  mainWindow = createMainWindow();
+});
 
 // quit application when all windows are closed
 app.on('window-all-closed', (): void => {
@@ -39,9 +61,4 @@ app.on('activate', (): void => {
   if (mainWindow === null) {
     mainWindow = createMainWindow();
   }
-});
-
-// create main BrowserWindow when electron is ready
-app.on('ready', (): void => {
-  mainWindow = createMainWindow();
 });
