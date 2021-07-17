@@ -6,7 +6,7 @@ export const DeviceManager: React.FC = () => {
   return (
     <div>
       <h2>Device Manager</h2>
-      {!!gatt ? (
+      {!!gatt?.connected ? (
         <span>
           Connected - {gatt.device.name} -{' '}
           <button disabled={isLoading} onClick={disconnect}>

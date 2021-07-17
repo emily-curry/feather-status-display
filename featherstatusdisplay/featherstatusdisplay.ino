@@ -5,7 +5,7 @@
 #include "PixelController.h"
 #include "DisplayController.h"
 
-// #define STATUS_DISPLAY_WAIT_SERIAL
+#define STATUS_DISPLAY_WAIT_SERIAL
 // #define PIXEL_ENABLE
 
 BLEStatusService statusSvc = BLEStatusService();
@@ -28,7 +28,7 @@ void setup()
   PixelController::begin();
   startBle();
   statusSvc.begin();
-  imageSvc.begin();
+  // imageSvc.begin();
   startAdv();
 }
 
@@ -41,6 +41,7 @@ void startBle(void)
   Serial.println("Initialize the Bluefruit module...");
   Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
   Bluefruit.begin();
+  // Bluefruit.setTxPower(4); // Check bluefruit.h for supported values
 
   Serial.println("Setting Device Name...");
   Bluefruit.setName("Emily's Cool Thing");
@@ -57,7 +58,7 @@ void startBle(void)
 
   Serial.println("Configuring the Battery Service");
   blebas.begin();
-  blebas.write(100); // Is this correct? Will it auto update?
+  // blebas.write(100); // Is this correct? Will it auto update?
 }
 
 void connect_callback(uint16_t conn_handle)
@@ -65,29 +66,25 @@ void connect_callback(uint16_t conn_handle)
   // Get the reference to current connection
   BLEConnection *conn = Bluefruit.Connection(conn_handle);
 
-  char central_name[32] = {0};
-  conn->getPeerName(central_name, sizeof(central_name));
+  Serial.println("Connected");
 
   // request PHY changed to 2MB
-  Serial.println("Request to change PHY");
-  conn->requestPHY();
+  // Serial.println("Request to change PHY");
+  // conn->requestPHY();
 
-  // request to update data length
-  Serial.println("Request to change Data Length");
-  conn->requestDataLengthUpdate();
+  // // request to update data length
+  // Serial.println("Request to change Data Length");
+  // conn->requestDataLengthUpdate();
 
-  // request mtu exchange
+  // // request mtu exchange
   Serial.println("Request to change MTU");
-  conn->requestMtuExchange(247);
+  conn->requestMtuExchange(BLE_GATT_ATT_MTU_DEFAULT);
 
   // request connection interval of 7.5 ms
-  //conn->requestConnectionParameter(6); // in unit of 1.25
+  // conn->requestConnectionParameter(6); // in unit of 1.25
 
   // delay a bit for all the request to complete
   delay(1000);
-
-  Serial.print("Connected to ");
-  Serial.println(central_name);
 }
 
 /**
@@ -112,10 +109,10 @@ void startAdv(void)
   Bluefruit.Advertising.addTxPower();
 
   // Include Status Service
-  Bluefruit.Advertising.addService(statusSvc);
+  Bluefruit.Advertising.addService(statusSvc, blebas, bledis);
 
   // Include Name
-  Bluefruit.Advertising.addName();
+  Bluefruit.ScanResponse.addName();
 
   /* Start Advertising
    * - Enable auto advertising if disconnected

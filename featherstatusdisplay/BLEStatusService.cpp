@@ -10,15 +10,17 @@ BLEStatusService::BLEStatusService(void) : BLEService(UUID16_SVC_STATUS), _statu
 
 err_t BLEStatusService::begin(void)
 {
+  BLEService::setPermission(SECMODE_OPEN, SECMODE_OPEN);
   VERIFY_STATUS(BLEService::begin());
-  BLEStatusService::setStatusCode(StatusCode::STATUS_UNKNOWN);
 
   _statusCode.setProperties(CHR_PROPS_WRITE_WO_RESP);
   _statusCode.setPermission(SECMODE_OPEN, SECMODE_OPEN);
   _statusCode.setFixedLen(1);
   _statusCode.setWriteCallback(BLEStatusService::writeCallback);
   _statusCode.setUserDescriptor("Status Code");
-  _statusCode.begin();
+  VERIFY_STATUS(_statusCode.begin());
+  // BLEStatusService::setStatusCode(StatusCode::STATUS_UNKNOWN);
+  // _statusCode.write8(StatusCode::STATUS_UNKNOWN);
 
   return ERROR_NONE;
 }
@@ -32,6 +34,7 @@ void BLEStatusService::writeCallback(uint16_t conn_hdl, BLECharacteristic *chr, 
 {
   uint8_t code = chr->read8();
   BLEStatusService::setStatusCode(toStatusCode(code));
+  // chr->notify8(code);
 }
 
 void BLEStatusService::setStatusCode(StatusCode code)

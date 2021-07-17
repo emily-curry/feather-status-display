@@ -9,7 +9,11 @@
       "name": "Web App"
     }
   ],
-  "settings": {},
+  "settings": {
+    "arduino.enableUSBDetection": false,
+    "arduino.skipHeaderProvider": true,
+    "arduino.disableIntelliSenseAutoGen": true
+  },
   "extensions": {
     "recommendations": [
       "vsciot-vscode.vscode-arduino",
