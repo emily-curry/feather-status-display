@@ -1,17 +1,21 @@
-import { app, BrowserWindow, Menu, nativeImage, Tray } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron';
 import { getAssetURL } from 'electron-snowpack';
-import { join } from 'path';
+import { IPC_CHANNEL } from '../renderer/channel';
+import { ElectronAuthenticationProvider } from './graph';
+import { nativeIcon } from './util';
 
 app.commandLine.appendSwitch('enable-experimental-web-platform-features');
 
 let mainWindow: BrowserWindow | null | undefined;
 let tray: Tray | undefined;
 
-const nativeIcon = nativeImage.createFromPath(join(__dirname, 'favicon.ico'));
-
 function createMainWindow(): BrowserWindow {
   const window = new BrowserWindow({
     icon: nativeIcon,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
   });
 
   if (process.env.MODE !== 'production') {
@@ -88,5 +92,24 @@ app.on('activate', (): void => {
   // on macOS it is common to re-create a window even after all windows have been closed
   if (mainWindow === null) {
     mainWindow = createMainWindow();
+  }
+});
+
+const authProvider = new ElectronAuthenticationProvider();
+
+ipcMain.on(IPC_CHANNEL.MSALReqAccessToken, async (ev) => {
+  let token: string | undefined;
+  try {
+    token = await authProvider.getAccessToken();
+  } finally {
+    ev.reply(IPC_CHANNEL.MSALResAccessToken, token);
+  }
+});
+
+ipcMain.on(IPC_CHANNEL.MSALReqLogOut, async (ev) => {
+  try {
+    await authProvider.logOut();
+  } finally {
+    ev.reply(IPC_CHANNEL.MSALResLogOut);
   }
 });
