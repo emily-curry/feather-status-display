@@ -7,6 +7,7 @@ class BLEBatteryService : public BLEBas
 {
 protected:
   static uint8_t getCharge();
+  uint8_t charge;
 
 public:
   BLEBatteryService(void);

@@ -1,6 +1,9 @@
 #include "BLEBatteryService.h"
 
-BLEBatteryService::BLEBatteryService(void) : BLEBas() {}
+BLEBatteryService::BLEBatteryService(void) : BLEBas()
+{
+  charge = 100;
+}
 
 err_t BLEBatteryService::begin(void)
 {
@@ -14,9 +17,13 @@ err_t BLEBatteryService::begin(void)
 
 void BLEBatteryService::update()
 {
-  uint8_t charge = BLEBatteryService::getCharge();
-  this->write(charge);
-  this->notify(charge);
+  uint8_t nextCharge = BLEBatteryService::getCharge();
+  if (nextCharge != charge)
+  {
+    charge = nextCharge;
+    this->write(charge);
+    this->notify(charge);
+  }
 }
 
 uint8_t BLEBatteryService::getCharge()
@@ -25,8 +32,6 @@ uint8_t BLEBatteryService::getCharge()
   measuredvbat *= 2;    // we divided by 2, so multiply back
   measuredvbat *= 3.3;  // Multiply by 3.3V, our reference voltage
   measuredvbat /= 1024; // convert to voltage
-  Serial.print("VBat: ");
-  Serial.println(measuredvbat);
   measuredvbat -= 3.2;
   measuredvbat *= 100;
   if (measuredvbat > 100)

@@ -5,14 +5,16 @@
 #include "BLEImageService.h"
 #include "PixelController.h"
 #include "DisplayController.h"
+#include "ButtonController.h"
 
-#define STATUS_DISPLAY_WAIT_SERIAL
+// #define STATUS_DISPLAY_WAIT_SERIAL
 // #define PIXEL_ENABLE
 
 BLEBatteryService batterySvc = BLEBatteryService();
 BLEStatusService statusSvc = BLEStatusService();
 BLEImageService imageSvc = BLEImageService();
 BLEDis bledis = BLEDis();
+ButtonController button = ButtonController();
 
 void setup()
 {
@@ -34,8 +36,9 @@ void setup()
 
 void loop()
 {
-  delay(100000);
+  delay(1000);
   batterySvc.update();
+  button.update();
 }
 
 void startBle(void)
