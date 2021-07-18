@@ -16,8 +16,9 @@ const FeatherContext = React.createContext<FeatherContextControl>({} as any);
 export const FeatherProvider: React.FC = (props) => {
   const [isLoading, setLoading] = useState(false);
   const [device, setDevice] = useState<undefined | BluetoothDevice>(undefined);
-  const [gatt, setGatt] =
-    useState<undefined | BluetoothRemoteGATTServer>(undefined);
+  const [gatt, setGatt] = useState<undefined | BluetoothRemoteGATTServer>(
+    undefined,
+  );
 
   const connect = useCallback(async () => {
     try {
@@ -27,7 +28,13 @@ export const FeatherProvider: React.FC = (props) => {
         optionalServices: ['battery_service', UUID16_SVC_IMAGE],
       });
       setDevice(device);
-      setGatt(await device.gatt?.connect());
+
+      if (device.gatt) {
+        const server = await device.gatt.connect();
+        setGatt(server);
+      } else {
+        setGatt(undefined);
+      }
     } catch (e) {
       console.error(e);
     } finally {

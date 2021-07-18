@@ -1,5 +1,6 @@
 #include "bluefruit.h"
 #include "SDCard.h"
+#include "BLEBatteryService.h"
 #include "BLEStatusService.h"
 #include "BLEImageService.h"
 #include "PixelController.h"
@@ -8,16 +9,15 @@
 #define STATUS_DISPLAY_WAIT_SERIAL
 // #define PIXEL_ENABLE
 
+BLEBatteryService batterySvc = BLEBatteryService();
 BLEStatusService statusSvc = BLEStatusService();
 BLEImageService imageSvc = BLEImageService();
 BLEDis bledis = BLEDis();
-BLEBas blebas = BLEBas();
 
 void setup()
 {
-#ifdef STATUS_DISPLAY_WAIT_SERIAL
-
   Serial.begin(115200);
+#ifdef STATUS_DISPLAY_WAIT_SERIAL
   while (!Serial)
     delay(10); // for nrf52840 with native usb
 
@@ -28,12 +28,14 @@ void setup()
   PixelController::begin();
   startBle();
   statusSvc.begin();
-  // imageSvc.begin();
+  imageSvc.begin();
   startAdv();
 }
 
 void loop()
 {
+  delay(100000);
+  batterySvc.update();
 }
 
 void startBle(void)
@@ -41,24 +43,25 @@ void startBle(void)
   Serial.println("Initialize the Bluefruit module...");
   Bluefruit.configPrphBandwidth(BANDWIDTH_MAX);
   Bluefruit.begin();
+  Bluefruit.Periph.clearBonds();
   // Bluefruit.setTxPower(4); // Check bluefruit.h for supported values
 
   Serial.println("Setting Device Name...");
-  Bluefruit.setName("Emily's Cool Thing");
+  Bluefruit.setName("Emily!");
 
   // Set the connect/disconnect callback handlers
   Bluefruit.Periph.setConnectCallback(connect_callback);
   Bluefruit.Periph.setDisconnectCallback(disconnect_callback);
-  Bluefruit.Periph.setConnInterval(6, 12); // 7.5 - 15 ms
+  // Bluefruit.Periph.setConnInterval(6, 12); // 7.5 - 15 ms
 
   Serial.println("Configuring the Device Information Service");
   bledis.setManufacturer("Emily's Cool Stuff.com");
   bledis.setModel("Feather Status Display");
+  bledis.setPermission(SECMODE_OPEN, SECMODE_NO_ACCESS);
   bledis.begin();
 
   Serial.println("Configuring the Battery Service");
-  blebas.begin();
-  // blebas.write(100); // Is this correct? Will it auto update?
+  batterySvc.begin();
 }
 
 void connect_callback(uint16_t conn_handle)
@@ -66,25 +69,29 @@ void connect_callback(uint16_t conn_handle)
   // Get the reference to current connection
   BLEConnection *conn = Bluefruit.Connection(conn_handle);
 
-  Serial.println("Connected");
+  char central_name[32] = {0};
+  conn->getPeerName(central_name, sizeof(central_name));
 
   // request PHY changed to 2MB
-  // Serial.println("Request to change PHY");
-  // conn->requestPHY();
+  Serial.println("Request to change PHY");
+  conn->requestPHY();
 
   // // request to update data length
-  // Serial.println("Request to change Data Length");
-  // conn->requestDataLengthUpdate();
+  Serial.println("Request to change Data Length");
+  conn->requestDataLengthUpdate();
 
   // // request mtu exchange
   Serial.println("Request to change MTU");
-  conn->requestMtuExchange(BLE_GATT_ATT_MTU_DEFAULT);
+  conn->requestMtuExchange(237);
 
   // request connection interval of 7.5 ms
   // conn->requestConnectionParameter(6); // in unit of 1.25
 
   // delay a bit for all the request to complete
   delay(1000);
+
+  Serial.print("Connected to ");
+  Serial.println(central_name);
 }
 
 /**
@@ -109,10 +116,10 @@ void startAdv(void)
   Bluefruit.Advertising.addTxPower();
 
   // Include Status Service
-  Bluefruit.Advertising.addService(statusSvc, blebas, bledis);
+  Bluefruit.Advertising.addService(statusSvc);
 
   // Include Name
-  Bluefruit.ScanResponse.addName();
+  Bluefruit.Advertising.addName();
 
   /* Start Advertising
    * - Enable auto advertising if disconnected

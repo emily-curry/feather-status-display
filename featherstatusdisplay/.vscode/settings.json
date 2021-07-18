@@ -1,7 +1,4 @@
 {
-  "arduino.enableUSBDetection": false,
-  "arduino.skipHeaderProvider": true,
-  "arduino.disableIntelliSenseAutoGen": true,
   "files.exclude": {
     "**/.git": true,
     "**/.svn": true,

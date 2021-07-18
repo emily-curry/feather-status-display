@@ -1,9 +1,8 @@
 {
-  "sketch": "featherstatusdisplay.ino",
-  "board": "adafruit:nrf52:feather52840",
-  "configuration": "softdevice=s140v6,debug=l1",
-  "port": "COM5",
-  "output": "target",
-  "disableIntelliSenseAutoGen": true,
-  "programmer": "adafruit:nrfutil_boot"
+    "sketch": "featherstatusdisplay.ino",
+    "board": "adafruit:nrf52:feather52840",
+    "configuration": "softdevice=s140v6,debug=l0",
+    "port": "COM3",
+    "output": "target",
+    "programmer": "adafruit:nrfutil_boot"
 }

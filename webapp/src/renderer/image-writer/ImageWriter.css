@@ -1,0 +1,15 @@
+#image-writer-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+#image-writer-form button[type='submit'] {
+  align-self: center;
+}
+
+#image-writer-form input[type='file'] {
+  visibility: hidden;
+  position: absolute;
+}

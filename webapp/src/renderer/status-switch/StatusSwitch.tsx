@@ -1,49 +1,39 @@
-import React, {
-  useState,
-  useCallback,
-  ChangeEvent,
-  FormEvent,
-  useEffect,
-} from 'react';
+import React, { FormEvent, useCallback, useEffect, useState } from 'react';
+import { StatusPicker } from '../status-picker/StatusPicker';
 import { StatusCode } from '../util/statusCode';
 import { useFeatherGatt } from '../util/useFeatherDevice';
+import './StatusSwitch.css';
 import { useReadStatusCode } from './useReadStatusCode';
 import { useWriteStatusCode } from './useWriteStatusCode';
 
 export const StatusSwitch: React.FC = () => {
   const gatt = useFeatherGatt();
-  return gatt?.connected ? <_StatusSwitch /> : <></>;
+  return gatt?.connected ? <_StatusSwitch gatt={gatt} /> : <></>;
 };
 
-const _StatusSwitch: React.FC = () => {
-  const writeStatusCode = useWriteStatusCode();
-  const readStatusCode = useReadStatusCode();
+const _StatusSwitch: React.FC<{ gatt: BluetoothRemoteGATTServer }> = (
+  props,
+) => {
+  const writeStatusCode = useWriteStatusCode(props.gatt);
+  const readStatusCode = useReadStatusCode(props.gatt);
   const [statusCode, setStatusCode] = useState<StatusCode | undefined>(
     undefined,
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const exec = async () => {
-      setIsLoading(true);
-      try {
-        const value = await readStatusCode();
-        setStatusCode(value);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    exec();
-  }, [setStatusCode, setIsLoading]);
+  const refresh = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const value = await readStatusCode();
+      setStatusCode(value);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [readStatusCode, setStatusCode, setIsLoading]);
 
-  const handleStatusChange = useCallback(
-    (e: ChangeEvent<HTMLSelectElement>) => {
-      const status = parseInt(e.target.value);
-      if (!isNaN(status)) setStatusCode(status as StatusCode);
-      else setStatusCode(undefined);
-    },
-    [setStatusCode],
-  );
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleSubmit = useCallback(
     (e: FormEvent) => {
@@ -65,26 +55,19 @@ const _StatusSwitch: React.FC = () => {
   return (
     <div>
       <h2>Status Code</h2>
-      <div>
-        <form onSubmit={handleSubmit}>
-          <select
-            name="status"
-            onChange={handleStatusChange}
-            value={statusCode}
-            disabled={isLoading}
-          >
-            <option value={undefined}>--</option>
-            <option value={StatusCode.STATUS_AVAILABLE}>Available</option>
-            <option value={StatusCode.STATUS_OFFLINE}>Offline</option>
-            <option value={StatusCode.STATUS_BUSY}>Busy</option>
-            <option value={StatusCode.STATUS_DND}>Do Not Disturb</option>
-            <option value={StatusCode.STATUS_UNKNOWN}>Unknown</option>
-          </select>
-          <button type="submit" disabled={isLoading}>
-            Set
-          </button>
-        </form>
-      </div>
+      <form id="status-switch-form" onSubmit={handleSubmit}>
+        <button onClick={refresh} disabled={isLoading}>
+          Refresh
+        </button>
+        <StatusPicker
+          value={statusCode}
+          onChange={setStatusCode}
+          disabled={isLoading}
+        />
+        <button type="submit" disabled={isLoading || statusCode === undefined}>
+          Set
+        </button>
+      </form>
     </div>
   );
 };
