@@ -11,7 +11,6 @@ export const useBattery = (gatt: BluetoothRemoteGATTServer) => {
         'battery_level',
       );
       const callback = (ev: any) => {
-        console.log('cb', ev.target.value);
         const value = ev.target.value.getUint8(0);
         if (typeof value === 'number') setBattery(value);
         else setBattery(undefined);
@@ -27,10 +26,6 @@ export const useBattery = (gatt: BluetoothRemoteGATTServer) => {
     exec();
     return cleanup;
   }, [gatt, setBattery]);
-
-  useEffect(() => {
-    console.log(battery);
-  }, [battery]);
 
   return useMemo(() => {
     if (battery === undefined) return '??';

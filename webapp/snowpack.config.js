@@ -4,10 +4,21 @@
 /** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
   extends: 'electron-snowpack/config/snowpack.js',
-  mount: {
-    public: { url: '/', resolve: false },
-  },
-  plugins: ['@snowpack/plugin-react-refresh'],
+  mount: {},
+  plugins: [
+    '@snowpack/plugin-react-refresh',
+    [
+      'snowpack-plugin-copy',
+      {
+        patterns: [
+          {
+            source: 'public/favicon.ico',
+            destination: 'dist/main',
+          },
+        ],
+      },
+    ],
+  ],
   packageOptions: {
     /* ... */
   },

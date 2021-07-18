@@ -1,12 +1,18 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Menu, nativeImage, Tray } from 'electron';
 import { getAssetURL } from 'electron-snowpack';
+import { join } from 'path';
 
 app.commandLine.appendSwitch('enable-experimental-web-platform-features');
 
 let mainWindow: BrowserWindow | null | undefined;
+let tray: Tray | undefined;
+
+const nativeIcon = nativeImage.createFromPath(join(__dirname, 'favicon.ico'));
 
 function createMainWindow(): BrowserWindow {
-  const window = new BrowserWindow();
+  const window = new BrowserWindow({
+    icon: nativeIcon,
+  });
 
   if (process.env.MODE !== 'production') {
     window.webContents.openDevTools();
@@ -46,15 +52,36 @@ function createMainWindow(): BrowserWindow {
 
 // create main BrowserWindow when electron is ready
 app.on('ready', (): void => {
-  mainWindow = createMainWindow();
+  tray = new Tray(nativeIcon);
+
+  const show = () => {
+    if (mainWindow) mainWindow.show();
+    else mainWindow = createMainWindow();
+  };
+
+  if (process.platform === 'win32') {
+    tray.on('click' as any, show);
+  }
+
+  const menu = Menu.buildFromTemplate([
+    {
+      label: 'Show',
+      click: show,
+    },
+    {
+      label: 'Quit',
+      click() {
+        app.quit();
+      },
+    },
+  ]);
+  tray.setToolTip('Feather Status');
+  tray.setContextMenu(menu);
 });
 
-// quit application when all windows are closed
 app.on('window-all-closed', (): void => {
-  // on macOS it is common for applications to stay open until the user explicitly quits
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  mainWindow?.destroy();
+  mainWindow = null;
 });
 
 app.on('activate', (): void => {

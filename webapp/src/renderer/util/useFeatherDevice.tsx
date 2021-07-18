@@ -29,6 +29,37 @@ export const FeatherProvider: React.FC = (props) => {
       });
       setDevice(device);
 
+      let retryCount = 0;
+      const retryConnect = async () => {
+        if (retryCount >= 5) {
+          setDevice(undefined);
+        } else {
+          retryCount++;
+          setLoading(true);
+
+          let server: BluetoothRemoteGATTServer | undefined;
+          try {
+            server = await device.gatt?.connect();
+          } finally {
+            if (server) {
+              setGatt(server);
+              setLoading(false);
+            } else {
+              await new Promise((r) =>
+                window.setTimeout(r, retryCount * 10000),
+              );
+              setLoading(false);
+              await retryConnect();
+            }
+          }
+        }
+      };
+
+      device.ongattserverdisconnected = (ev) => {
+        setGatt(undefined);
+        retryConnect();
+      };
+
       if (device.gatt) {
         const server = await device.gatt.connect();
         setGatt(server);
@@ -44,12 +75,13 @@ export const FeatherProvider: React.FC = (props) => {
 
   const disconnect = useCallback(async () => {
     try {
-      await gatt?.disconnect();
+      if (device) device.ongattserverdisconnected = () => {};
+      await device?.gatt?.disconnect();
     } finally {
       setDevice(undefined);
       setGatt(undefined);
     }
-  }, [gatt, setGatt, setDevice]);
+  }, [device, setGatt, setDevice]);
 
   const control: FeatherContextControl = useMemo(() => {
     return {
