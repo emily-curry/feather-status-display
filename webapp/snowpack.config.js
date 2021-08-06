@@ -15,6 +15,10 @@ module.exports = {
             source: 'public/favicon.ico',
             destination: 'dist/main',
           },
+          {
+            source: 'public/icon*.png',
+            destination: 'dist/main',
+          },
         ],
       },
     ],

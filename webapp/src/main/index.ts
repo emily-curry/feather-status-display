@@ -2,16 +2,18 @@ import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron';
 import { getAssetURL } from 'electron-snowpack';
 import { IPC_CHANNEL } from '../renderer/channel';
 import { ElectronAuthenticationProvider } from './graph';
-import { nativeIcon } from './util';
+import { nativeIconLarge, nativeIconSmall } from './util';
 
 app.commandLine.appendSwitch('enable-experimental-web-platform-features');
 
 let mainWindow: BrowserWindow | null | undefined;
 let tray: Tray | undefined;
 
+app.dock.hide();
+
 function createMainWindow(): BrowserWindow {
   const window = new BrowserWindow({
-    icon: nativeIcon,
+    icon: nativeIconSmall,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -26,6 +28,7 @@ function createMainWindow(): BrowserWindow {
 
   window.on('closed', (): void => {
     mainWindow = null;
+    app.dock.hide();
   });
 
   window.webContents.on('devtools-opened', (): void => {
@@ -50,12 +53,13 @@ function createMainWindow(): BrowserWindow {
     },
   );
 
+  app.dock.show();
   return window;
 }
 
 // create main BrowserWindow when electron is ready
 app.on('ready', (): void => {
-  tray = new Tray(nativeIcon);
+  tray = new Tray(nativeIconSmall);
 
   const show = () => {
     if (mainWindow) mainWindow.show();
@@ -87,28 +91,21 @@ app.on('window-all-closed', (): void => {
   mainWindow = null;
 });
 
-app.on('activate', (): void => {
-  // on macOS it is common to re-create a window even after all windows have been closed
-  if (mainWindow === null) {
-    mainWindow = createMainWindow();
-  }
-});
-
 const authProvider = new ElectronAuthenticationProvider();
 
-ipcMain.on(IPC_CHANNEL.MSALReqAccessToken, async (ev) => {
+ipcMain.on(IPC_CHANNEL.MSALLogInRequest, async (ev) => {
   let token: string | undefined;
   try {
     token = await authProvider.getAccessToken();
   } finally {
- ev.reply(IPC_CHANNEL.MSALResAccessToken, token);
+    ev.reply(IPC_CHANNEL.MSALLogInRequestComplete, token);
   }
 });
 
-ipcMain.on(IPC_CHANNEL.MSALReqLogOut, async (ev) => {
+ipcMain.on(IPC_CHANNEL.MSALLogOutRequest, async (ev) => {
   try {
     await authProvider.logOut();
   } finally {
-    ev.reply(IPC_CHANNEL.MSALResLogOut);
+    ev.reply(IPC_CHANNEL.MSALLogOutRequestComplete);
   }
 });

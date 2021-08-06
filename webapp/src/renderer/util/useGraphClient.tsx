@@ -1,83 +1,65 @@
 import React, {
   createContext,
-  useContext,
   useCallback,
-  useState,
   useMemo,
+  useContext,
+  useState,
+  useEffect,
 } from 'react';
-import {
-  AuthenticationProvider,
-  AuthenticationProviderOptions,
-  ClientOptions,
-  Client,
-} from '@microsoft/microsoft-graph-client';
-const { ipcRenderer } = require('electron');
 import { IPC_CHANNEL } from '../channel';
+import { GraphActivityState, GraphMeState } from '../state';
+const { ipcRenderer } = require('electron');
 
 interface GraphClientContext {
-  graphClient: Client;
-  token?: string;
+  logIn: () => Promise<unknown>;
   logOut: () => Promise<void>;
-}
-
-class FeatherAuthProvider implements AuthenticationProvider {
-  constructor(private readonly onAuthTokenChange: (token?: string) => void) {}
-
-  public async getAccessToken(
-    authenticationProviderOptions?: AuthenticationProviderOptions | undefined,
-  ): Promise<string> {
-    const res = new Promise<string>((r) =>
-      ipcRenderer.once(IPC_CHANNEL.MSALResAccessToken, (e, a1) => r(a1)),
-    );
-    ipcRenderer.send(IPC_CHANNEL.MSALReqAccessToken);
-    const token = await res;
-    this.onAuthTokenChange(token);
-    return token;
-  }
+  me: GraphMeState;
+  activity: GraphActivityState;
 }
 
 const context = createContext<GraphClientContext>(null!);
 
 export const GraphClientProvider: React.FC = ({ children }) => {
-  const [token, setToken] = useState<string>();
+  const [me, setMeState] = useState<GraphMeState>({});
+  const [activity, setActivityState] = useState<GraphActivityState>({});
 
-  const authProvider = useMemo(() => {
-    return new FeatherAuthProvider(setToken);
-  }, [setToken]);
+  useEffect(() => {
+    const handleOnMe = (state: GraphMeState) => setMeState(state);
+    const handleOnActivity = (state: GraphActivityState) =>
+      setActivityState(state);
+    ipcRenderer.on(IPC_CHANNEL.GraphGetMeUpdate, handleOnMe);
+    ipcRenderer.on(IPC_CHANNEL.GraphGetActivityUpdate, handleOnActivity);
 
-  const graphClient = useMemo(() => {
-    const clientOptions: ClientOptions = {
-      authProvider,
+    return () => {
+      ipcRenderer.off(IPC_CHANNEL.GraphGetMeUpdate, handleOnMe);
+      ipcRenderer.off(IPC_CHANNEL.GraphGetActivityUpdate, handleOnActivity);
     };
+  }, [setMeState, setActivityState]);
 
-    return Client.initWithMiddleware(clientOptions);
-  }, [authProvider]);
+  const logIn = useCallback(async () => {
+    const res = new Promise<unknown>((r) =>
+      ipcRenderer.once(IPC_CHANNEL.MSALLogInRequestComplete, (data) => r(data)),
+    );
+    ipcRenderer.send(IPC_CHANNEL.MSALLogInRequest);
+    await res;
+  }, []);
 
   const logOut = useCallback(async () => {
     const res = new Promise<void>((r) =>
-      ipcRenderer.once(IPC_CHANNEL.MSALResLogOut, () => r()),
+      ipcRenderer.once(IPC_CHANNEL.MSALLogOutRequestComplete, () => r()),
     );
-    ipcRenderer.send(IPC_CHANNEL.MSALReqLogOut);
+    ipcRenderer.send(IPC_CHANNEL.MSALLogOutRequest);
     await res;
-    setToken(undefined);
-  }, [setToken]);
+  }, []);
 
   const value = useMemo(
-    () => ({ token, graphClient, logOut }),
-    [token, graphClient, logOut],
+    () => ({ logIn, logOut, me, activity }),
+    [logIn, logOut, me, activity],
   );
 
   return <context.Provider value={value}>{children}</context.Provider>;
 };
 
-export const useGraphClient = (): Client => {
-  return useContext(context).graphClient;
-};
-
-export const useGraphClientToken = (): string | undefined => {
-  return useContext(context).token;
-};
-
-export const useGraphClientLogOut = () => {
-  return useContext(context).logOut;
+export const useGraphClient = () => {
+  return useContext(context);
 };

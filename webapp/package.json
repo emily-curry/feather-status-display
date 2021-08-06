@@ -2,14 +2,21 @@
   "name": "webapp",
   "version": "1.0.0",
   "description": "playground web app for sending messages via bluetooth, only for testing/dev purposes",
+  "main": "dist/main/index.js",
   "scripts": {
     "start": "electron-snowpack dev",
     "build": "electron-snowpack build",
     "clean": "electron-snowpack clean",
     "dist": "electron-builder",
-    "dist:dir": "npm dist --dir -c.compression=store -c.mac.identity=null",
+    "dist:dir": "npm run dist --dir -c.compression=store -c.mac.identity=null",
     "open": "open dist/mac/${npm_package_name}.app",
-    "try": "run-s clean build dist:dir open"
+    "try": "run-s clean build dist:dir open",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "files": [
+      "dist/main/**/*"
+    ]
   },
   "author": "",
   "license": "ISC",

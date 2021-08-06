@@ -5,7 +5,7 @@ import {
 } from '@microsoft/microsoft-graph-client';
 import { BrowserWindow } from 'electron';
 import { getTokenInteractive, getTokenRefresh, logOut } from './ms';
-import { nativeIcon } from './util';
+import { nativeIconSmall } from './util';
 
 export class ElectronAuthenticationProvider implements AuthenticationProvider {
   private authRequest?: AuthenticationResult;
@@ -31,7 +31,7 @@ export class ElectronAuthenticationProvider implements AuthenticationProvider {
 
     if (!this.authRequest) {
       const window = new BrowserWindow({
-        icon: nativeIcon,
+        icon: nativeIconSmall,
         title: 'Authenticate',
       });
       this.authRequest = await getTokenInteractive(window, tokenRequest);
