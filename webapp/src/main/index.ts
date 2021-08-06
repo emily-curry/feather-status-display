@@ -40,7 +40,6 @@ function createMainWindow(): BrowserWindow {
     (event, deviceList, callback) => {
       event.preventDefault();
       const result = deviceList.find((device) => {
-        console.log(device);
         return device.deviceName?.toLocaleLowerCase()?.includes('emily');
       });
       if (!result) {
@@ -102,7 +101,7 @@ ipcMain.on(IPC_CHANNEL.MSALReqAccessToken, async (ev) => {
   try {
     token = await authProvider.getAccessToken();
   } finally {
-    ev.reply(IPC_CHANNEL.MSALResAccessToken, token);
+ ev.reply(IPC_CHANNEL.MSALResAccessToken, token);
   }
 });
 

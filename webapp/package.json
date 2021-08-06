@@ -28,7 +28,7 @@
     "@types/web-bluetooth": "^0.0.9",
     "electron": "^13.1.7",
     "electron-builder": "^22.10.5",
-    "electron-snowpack": "https://github.com/emily-curry/electron-snowpack/releases/download/v0.11.1-beta1/electron-snowpack.tar.gz",
+    "electron-snowpack": "^0.12.0",
     "npm-run-all": "^4.1.5",
     "snowpack": "^3.8.2",
     "snowpack-plugin-copy": "^1.0.1",

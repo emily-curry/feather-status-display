@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useState,
+  useMemo,
+} from 'react';
 import {
   AuthenticationProvider,
   AuthenticationProviderOptions,
@@ -8,7 +14,15 @@ import {
 const { ipcRenderer } = require('electron');
 import { IPC_CHANNEL } from '../channel';
 
+interface GraphClientContext {
+  graphClient: Client;
+  token?: string;
+  logOut: () => Promise<void>;
+}
+
 class FeatherAuthProvider implements AuthenticationProvider {
+  constructor(private readonly onAuthTokenChange: (token?: string) => void) {}
+
   public async getAccessToken(
     authenticationProviderOptions?: AuthenticationProviderOptions | undefined,
   ): Promise<string> {
@@ -17,32 +31,53 @@ class FeatherAuthProvider implements AuthenticationProvider {
     );
     ipcRenderer.send(IPC_CHANNEL.MSALReqAccessToken);
     const token = await res;
+    this.onAuthTokenChange(token);
     return token;
   }
 }
 
-let clientOptions: ClientOptions = {
-  authProvider: new FeatherAuthProvider(),
-};
-
-const graphClient = Client.initWithMiddleware(clientOptions);
-
-const context = createContext(graphClient);
+const context = createContext<GraphClientContext>(null!);
 
 export const GraphClientProvider: React.FC = ({ children }) => {
-  return <context.Provider value={graphClient}>{children}</context.Provider>;
-};
+  const [token, setToken] = useState<string>();
 
-export const useGraphClient = () => {
-  return useContext(context);
-};
+  const authProvider = useMemo(() => {
+    return new FeatherAuthProvider(setToken);
+  }, [setToken]);
 
-export const useGraphClientLogOut = () => {
-  return useCallback(async () => {
+  const graphClient = useMemo(() => {
+    const clientOptions: ClientOptions = {
+      authProvider,
+    };
+
+    return Client.initWithMiddleware(clientOptions);
+  }, [authProvider]);
+
+  const logOut = useCallback(async () => {
     const res = new Promise<void>((r) =>
       ipcRenderer.once(IPC_CHANNEL.MSALResLogOut, () => r()),
     );
     ipcRenderer.send(IPC_CHANNEL.MSALReqLogOut);
     await res;
-  }, []);
+    setToken(undefined);
+  }, [setToken]);
+
+  const value = useMemo(
+    () => ({ token, graphClient, logOut }),
+    [token, graphClient, logOut],
+  );
+
+  return <context.Provider value={value}>{children}</context.Provider>;
+};
+
+export const useGraphClient = (): Client => {
+  return useContext(context).graphClient;
+};
+
+export const useGraphClientToken = (): string | undefined => {
+  return useContext(context).token;
+};
+
+export const useGraphClientLogOut = () => {
+  return useContext(context).logOut;
 };

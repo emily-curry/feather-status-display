@@ -53,7 +53,6 @@ export async function getTokenRefresh(tokenRequest: TokenRequest) {
 
   const accounts = await pca.getTokenCache().getAllAccounts();
   const account = accounts?.[0];
-  console.log(account);
 
   if (!account) return undefined;
 

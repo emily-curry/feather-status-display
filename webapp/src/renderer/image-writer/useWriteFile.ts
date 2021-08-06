@@ -21,7 +21,6 @@ export const useWriteFile = (gatt: BluetoothRemoteGATTServer) => {
           UUID16_CHR_IMAGE_WRITER,
         );
         for (let offset = 0; offset < file.byteLength; offset += 508) {
-          console.log('writing image chunk at offset', offset);
           const offsetArray = new Uint32Array([offset]);
           const view = new Uint8Array(
             file.slice(offset, Math.min(offset + 508, file.byteLength)),

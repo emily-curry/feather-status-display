@@ -1,20 +1,32 @@
 import React, { useCallback } from 'react';
-import { useGraphClient, useGraphClientLogOut } from '../util/useGraphClient';
+import { useGraphClientLogOut } from '../util/useGraphClient';
+import { useMsSync } from './useMsSync';
 
 export const MsSync: React.FC = () => {
-  const client = useGraphClient();
   const logOut = useGraphClientLogOut();
 
-  const handleClick = useCallback(async () => {
-    const res = await client.api('/me').get();
-    console.log(res);
-  }, [client]);
+  const onLogOut = useCallback(async () => {
+    // TODO: Stop sync interval
+    await logOut();
+  }, [logOut]);
+
+  const { hasToken, email, loadMe } = useMsSync();
 
   return (
     <div>
       <h2>MS Sync</h2>
-      <button onClick={handleClick}>log info</button>
-      <button onClick={logOut}>log out</button>
+      {!hasToken ? (
+        <>
+          <button onClick={loadMe}>log in</button>
+        </>
+      ) : (
+        <>
+          <div className="flex-between">
+            <span>{email}</span>
+            <button onClick={onLogOut}>log out</button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
