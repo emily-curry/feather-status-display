@@ -54,7 +54,7 @@ void BLEImageService::controlCallback(uint16_t conn_hdl, BLECharacteristic *chr,
   {
     PixelController::setBusyRead();
     // Second byte = Status Code
-    StatusCode code = toStatusCode(chr->read8());
+    StatusCode code = toStatusCode((uint8_t)((chr->read16()) >> 8));
     Serial.print("Image Writer - Command Received - Open File ");
     Serial.println(code);
     SDCard::openFile(code);

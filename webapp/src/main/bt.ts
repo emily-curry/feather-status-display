@@ -2,22 +2,24 @@ import { BrowserWindow, ipcMain } from 'electron';
 import { getAssetURL } from 'electron-snowpack';
 import { IpcMainEvent } from 'electron/main';
 import { IPC_CHANNEL } from '../renderer/channel';
-import { BluetoothState } from '../renderer/state';
+import {
+  BluetoothState,
+  mapActivityToStatusCode,
+  PresenceActivity,
+} from '../renderer/state';
 import { StatusCode } from '../renderer/util/statusCode';
 import { readFile } from 'fs/promises';
 
 const setLoading = (loading: boolean) =>
   ({ type: 'set loading', loading } as const);
-
 const setDeviceName = (name?: string) =>
   ({ type: 'set device name', name } as const);
-
 const setDeviceBattery = (battery?: number) =>
   ({ type: 'set device battery', battery } as const);
-
 const setDeviceStatusCode = (statusCode?: StatusCode) =>
   ({ type: 'set device status code', statusCode } as const);
-
+const setUploadProgress = (percent?: number) =>
+  ({ type: 'set upload progress', payload: percent } as const);
 const reset = () => ({ type: 'reset' } as const);
 
 type Action =
@@ -25,6 +27,7 @@ type Action =
   | ReturnType<typeof setDeviceName>
   | ReturnType<typeof setDeviceBattery>
   | ReturnType<typeof setDeviceStatusCode>
+  | ReturnType<typeof setUploadProgress>
   | ReturnType<typeof reset>;
 
 const initialState: BluetoothState = {
@@ -53,7 +56,16 @@ const bluetoothReducer = (
     }
     case 'set device status code': {
       if (!state.device) return state;
-      const device = { ...state.device, status: action.statusCode };
+      const device = {
+        ...state.device,
+        status: action.statusCode,
+        uploadProgress: undefined,
+      };
+      return { ...state, device };
+    }
+    case 'set upload progress': {
+      if (!state.device) return state;
+      const device = { ...state.device, uploadProgress: action.payload };
       return { ...state, device };
     }
     case 'reset': {
@@ -77,6 +89,10 @@ export class FeatherBluetoothService {
   });
 
   constructor() {
+    ipcMain.addListener(
+      IPC_CHANNEL.GraphActivityChange,
+      this.onPresenceActivityChange,
+    );
     // renderer
     ipcMain.on(IPC_CHANNEL.BluetoothStateUpdateRequest, this.onRequestUpdate);
     ipcMain.on(IPC_CHANNEL.BluetoothDeviceRequest, this.onRequestDevice);
@@ -103,11 +119,21 @@ export class FeatherBluetoothService {
     ipcMain.on(IPC_CHANNEL.BluetoothWorkerStatusUpdate, (e, code) => {
       this.dispatch(setDeviceStatusCode(code));
     });
-    this.window.loadURL(getAssetURL('bt-worker.html'));
+    ipcMain.on(
+      IPC_CHANNEL.BluetoothWorkerImageWriteRequestProgressUpdate,
+      (e, percent) => {
+        this.dispatch(setUploadProgress(percent));
+      },
+    );
     this.window.webContents.on(
       'select-bluetooth-device',
       this.onSelectBluetoothDevice,
     );
+  }
+
+  public async init() {
+    await this.window.loadURL(getAssetURL('bt-worker.html'));
+    await this.onRequestDevice(undefined);
   }
 
   public setOnStateChange(handler?: (state: BluetoothState) => void) {
@@ -130,22 +156,18 @@ export class FeatherBluetoothService {
     event.reply(IPC_CHANNEL.BluetoothStateUpdate, this.state);
   };
 
-  private readonly onRequestDevice = async (event: IpcMainEvent) => {
+  private readonly onRequestDevice = async (
+    event: IpcMainEvent | undefined,
+  ) => {
     this.dispatch(setLoading(true));
     try {
-      const p = new Promise<boolean>((r) => {
-        ipcMain.once(
-          IPC_CHANNEL.BluetoothWorkerConnectRequestComplete,
-          (e, didConnect) => r(didConnect),
-        );
-      });
       // Can only be triggered by "user gesture"
       this.window.webContents.sendInputEvent({
         type: 'keyDown',
         keyCode: '49',
       });
     } finally {
-      event.reply(IPC_CHANNEL.BluetoothDeviceRequestComplete);
+      event?.reply(IPC_CHANNEL.BluetoothDeviceRequestComplete);
       this.dispatch(setLoading(false));
     }
   };
@@ -169,7 +191,7 @@ export class FeatherBluetoothService {
   };
 
   private readonly onWriteStatusCode = async (
-    event: IpcMainEvent,
+    event: IpcMainEvent | undefined,
     code: StatusCode,
   ) => {
     this.dispatch(setLoading(true));
@@ -205,6 +227,7 @@ export class FeatherBluetoothService {
       );
       await p;
     } finally {
+      this.dispatch(setUploadProgress(undefined));
       this.dispatch(setLoading(false));
     }
   };
@@ -230,6 +253,16 @@ export class FeatherBluetoothService {
       callback('');
     } else {
       callback(result.deviceId);
+    }
+  };
+
+  private readonly onPresenceActivityChange = async (
+    current?: PresenceActivity,
+  ) => {
+    if (!current) return;
+    const code = mapActivityToStatusCode(current);
+    if (code !== this.state.device?.status) {
+      await this.onWriteStatusCode(undefined, code);
     }
   };
 }

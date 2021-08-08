@@ -4,6 +4,7 @@ import { BatteryDisplay } from './BatteryDisplay';
 
 export const DeviceManager: React.FC = () => {
   const { connect, disconnect, state } = useFeatherControl();
+
   return (
     <div>
       <h2>Device Manager</h2>

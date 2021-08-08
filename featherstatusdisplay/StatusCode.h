@@ -10,6 +10,9 @@ enum StatusCode
   STATUS_BUSY = 2,
   STATUS_DND = 3,
   STATUS_AVAILABLE = 4,
+  STATUS_MEETING = 5,
+  STATUS_BRB = 6,
+  STATUS_OOO = 7,
 };
 
 StatusCode toStatusCode(uint8_t i);

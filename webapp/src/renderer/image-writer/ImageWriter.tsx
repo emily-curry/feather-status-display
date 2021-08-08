@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { BluetoothDeviceState } from '../state';
 import { StatusPicker } from '../status-picker/StatusPicker';
 import { StatusCode } from '../util/statusCode';
@@ -56,6 +56,12 @@ const _ImageWriter: React.FC<{
     }
   }, []);
 
+  const updateText = useMemo(() => {
+    return device.uploadProgress === undefined
+      ? 'Upload'
+      : `${device.uploadProgress.toString().padStart(2, '0')}%`;
+  }, [device]);
+
   return (
     <div>
       <h2>
@@ -78,7 +84,10 @@ const _ImageWriter: React.FC<{
         </div>
         <div className="flex-between">
           <label>File: </label>
-          <button onClick={() => fileInputRef?.current?.click()}>
+          <button
+            onClick={() => fileInputRef?.current?.click()}
+            disabled={isLoading}
+          >
             {file ? file.name : 'Choose'}
           </button>
         </div>
@@ -86,7 +95,7 @@ const _ImageWriter: React.FC<{
           onClick={handleSubmit}
           disabled={isLoading || statusCode === undefined || file === undefined}
         >
-          Update
+          {updateText}
         </button>
         <input
           ref={(el) => (fileInputRef.current = el)}

@@ -134,6 +134,10 @@ const onWriteImage = async (
         BLE_CHR_IMAGE_WRITER,
       );
       for (let offset = 0; offset < buf.byteLength; offset += 508) {
+        ipcRenderer.send(
+          IPC_CHANNEL.BluetoothWorkerImageWriteRequestProgressUpdate,
+          Math.round((offset / buf.byteLength) * 100),
+        );
         const offsetArray = new Uint32Array([offset]);
         const view = new Uint8Array(
           buf.slice(offset, Math.min(offset + 508, buf.byteLength)),

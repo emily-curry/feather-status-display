@@ -2,8 +2,12 @@ import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron';
 import { getAssetURL } from 'electron-snowpack';
 import { IPC_CHANNEL } from '../renderer/channel';
 import { FeatherBluetoothService } from './bt';
-import { ElectronAuthenticationProvider } from './graph';
+import { FeatherGraphService } from './graph';
 import { nativeIconSmall } from './util';
+import fetch from 'node-fetch';
+if (!globalThis.fetch) {
+  globalThis.fetch = fetch as any;
+}
 
 app.commandLine.appendSwitch('enable-experimental-web-platform-features');
 app.commandLine.appendSwitch('no-user-gesture-required');
@@ -11,6 +15,7 @@ app.commandLine.appendSwitch('no-user-gesture-required');
 let mainWindow: BrowserWindow | null | undefined;
 let tray: Tray | undefined;
 let bt: FeatherBluetoothService | undefined;
+let graph: FeatherGraphService | undefined;
 
 app.dock?.hide();
 
@@ -32,9 +37,11 @@ function createMainWindow(): BrowserWindow {
   bt!.setOnStateChange((state) => {
     window.webContents.send(IPC_CHANNEL.BluetoothStateUpdate, state);
   });
+  graph!.setWindow(window);
 
   window.on('closed', (): void => {
     bt!.setOnStateChange(undefined);
+    graph!.setWindow(undefined);
     mainWindow = null;
     app.dock?.hide();
   });
@@ -50,9 +57,10 @@ function createMainWindow(): BrowserWindow {
   return window;
 }
 
-// create main BrowserWindow when electron is ready
-app.on('ready', (): void => {
+app.on('ready', async () => {
   bt = new FeatherBluetoothService();
+  await bt.init();
+  graph = new FeatherGraphService();
   tray = new Tray(nativeIconSmall);
 
   const show = () => {
@@ -83,25 +91,6 @@ app.on('ready', (): void => {
 app.on('window-all-closed', (): void => {
   mainWindow?.destroy();
   mainWindow = null;
-});
-
-const authProvider = new ElectronAuthenticationProvider();
-
-ipcMain.on(IPC_CHANNEL.MSALLogInRequest, async (ev) => {
-  let token: string | undefined;
-  try {
-    token = await authProvider.getAccessToken();
-  } finally {
-    ev.reply(IPC_CHANNEL.MSALLogInRequestComplete, token);
-  }
-});
-
-ipcMain.on(IPC_CHANNEL.MSALLogOutRequest, async (ev) => {
-  try {
-    await authProvider.logOut();
-  } finally {
-    ev.reply(IPC_CHANNEL.MSALLogOutRequestComplete);
-  }
 });
 
 ipcMain.on('log', (e, data) => {

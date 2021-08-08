@@ -1,40 +1,35 @@
 import React, {
   createContext,
   useCallback,
-  useMemo,
   useContext,
-  useState,
   useEffect,
+  useMemo,
+  useState,
 } from 'react';
 import { IPC_CHANNEL } from '../channel';
-import { GraphActivityState, GraphMeState } from '../state';
+import { GraphState } from '../state';
 const { ipcRenderer } = require('electron');
 
 interface GraphClientContext {
   logIn: () => Promise<unknown>;
   logOut: () => Promise<void>;
-  me: GraphMeState;
-  activity: GraphActivityState;
+  state: GraphState;
 }
 
 const context = createContext<GraphClientContext>(null!);
 
 export const GraphClientProvider: React.FC = ({ children }) => {
-  const [me, setMeState] = useState<GraphMeState>({});
-  const [activity, setActivityState] = useState<GraphActivityState>({});
+  const [state, setState] = useState<GraphState>({ isLoading: false });
 
   useEffect(() => {
-    const handleOnMe = (state: GraphMeState) => setMeState(state);
-    const handleOnActivity = (state: GraphActivityState) =>
-      setActivityState(state);
-    ipcRenderer.on(IPC_CHANNEL.GraphGetMeUpdate, handleOnMe);
-    ipcRenderer.on(IPC_CHANNEL.GraphGetActivityUpdate, handleOnActivity);
+    const handleState = (ev: any, state: GraphState) => setState(state);
+    ipcRenderer.on(IPC_CHANNEL.GraphStateUpdate, handleState);
+    ipcRenderer.send(IPC_CHANNEL.GraphStateUpdateRequest);
 
     return () => {
-      ipcRenderer.off(IPC_CHANNEL.GraphGetMeUpdate, handleOnMe);
-      ipcRenderer.off(IPC_CHANNEL.GraphGetActivityUpdate, handleOnActivity);
+      ipcRenderer.off(IPC_CHANNEL.GraphStateUpdate, handleState);
     };
-  }, [setMeState, setActivityState]);
+  }, [setState]);
 
   const logIn = useCallback(async () => {
     const res = new Promise<unknown>((r) =>
@@ -53,8 +48,8 @@ export const GraphClientProvider: React.FC = ({ children }) => {
   }, []);
 
   const value = useMemo(
-    () => ({ logIn, logOut, me, activity }),
-    [logIn, logOut, me, activity],
+    () => ({ logIn, logOut, state }),
+    [logIn, logOut, state],
   );
 
   return <context.Provider value={value}>{children}</context.Provider>;
