@@ -24,6 +24,9 @@ export const StatusPicker: React.FC<{
       <option value={StatusCode.STATUS_BUSY}>Busy</option>
       <option value={StatusCode.STATUS_DND}>Do Not Disturb</option>
       <option value={StatusCode.STATUS_UNKNOWN}>Unknown</option>
+      <option value={StatusCode.STATUS_MEETING}>In a Meeting</option>
+      <option value={StatusCode.STATUS_BRB}>Be Right Back</option>
+      <option value={StatusCode.STATUS_OOO}>Out of Office</option>
     </select>
   );
 };
