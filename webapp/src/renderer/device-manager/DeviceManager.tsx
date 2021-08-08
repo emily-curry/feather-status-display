@@ -3,28 +3,28 @@ import { useFeatherControl } from '../util/useFeatherDevice';
 import { BatteryDisplay } from './BatteryDisplay';
 
 export const DeviceManager: React.FC = () => {
-  const { connect, disconnect, gatt, isLoading } = useFeatherControl();
+  const { connect, disconnect, state } = useFeatherControl();
   return (
     <div>
       <h2>Device Manager</h2>
-      {!!gatt?.connected ? (
+      {!!state.device ? (
         <>
           <div className="flex-between">
             <span>Connected</span>
-            <button disabled={isLoading} onClick={disconnect}>
+            <button disabled={state.isLoading} onClick={disconnect}>
               Disconnect
             </button>
           </div>
           <div className="flex-between">
             <span>Device Name:</span>
-            <span>{gatt.device.name}</span>
+            <span>{state.device.name}</span>
           </div>
-          <BatteryDisplay gatt={gatt} />
+          <BatteryDisplay battery={state.device.battery} />
         </>
       ) : (
         <div className="flex-between">
           <span>Not connected</span>
-          <button disabled={isLoading} onClick={connect}>
+          <button disabled={state.isLoading} onClick={connect}>
             Connect
           </button>
         </div>

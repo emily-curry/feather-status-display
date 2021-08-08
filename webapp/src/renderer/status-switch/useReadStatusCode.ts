@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
-import { BLE_CHR_STATUS_CODE, BLE_SERVICE_STATUS } from '../util/constants';
-import { useFeatherGatt } from '../util/useFeatherDevice';
+import { BLE_CHR_STATUS_CODE, BLE_SERVICE_STATUS } from '../constants';
 
 export const useReadStatusCode = (gatt: BluetoothRemoteGATTServer) => {
   return useCallback(async () => {

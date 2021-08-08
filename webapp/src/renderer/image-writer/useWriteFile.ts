@@ -3,7 +3,7 @@ import {
   UUID16_CHR_IMAGE_CONTROL,
   UUID16_CHR_IMAGE_WRITER,
   UUID16_SVC_IMAGE,
-} from '../util/constants';
+} from '../constants';
 import { StatusCode } from '../util/statusCode';
 
 export const useWriteFile = (gatt: BluetoothRemoteGATTServer) => {

@@ -11,4 +11,17 @@ export enum IPC_CHANNEL {
   GraphGetMeUpdate = 'GraphGetMeUpdate',
   /** Indicates the state of "activity" from the graph client has changed. main -> renderer */
   GraphGetActivityUpdate = 'GraphGetActivityUpdate',
+
+  BluetoothStateUpdate = 'BluetoothStateUpdate',
+  BluetoothStateUpdateRequest = 'BluetoothStateUpdateRequest',
+  BluetoothDeviceRequest = 'BluetoothDeviceRequest',
+  BluetoothDeviceRequestComplete = 'BluetoothDeviceRequestComplete',
+  BluetoothDisconnectRequest = 'BluetoothDisconnectRequest',
+  BluetoothDisconnectRequestComplete = 'BluetoothDisconnectRequestComplete',
+
+  BluetoothWorkerConnectRequest = 'BluetoothWorkerConnectRequest',
+  BluetoothWorkerConnectRequestComplete = 'BluetoothWorkerConnectRequestComplete',
+  BluetoothWorkerNameUpdate = 'BluetoothWorkerNameUpdate',
+  BluetoothWorkerBatteryUpdate = 'BluetoothWorkerBatteryUpdate',
+  BluetoothWorkerReset = 'BluetoothWorkerReset',
 }

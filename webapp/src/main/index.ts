@@ -1,15 +1,18 @@
 import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron';
 import { getAssetURL } from 'electron-snowpack';
 import { IPC_CHANNEL } from '../renderer/channel';
+import { FeatherBluetoothService } from './bt';
 import { ElectronAuthenticationProvider } from './graph';
-import { nativeIconLarge, nativeIconSmall } from './util';
+import { nativeIconSmall } from './util';
 
 app.commandLine.appendSwitch('enable-experimental-web-platform-features');
+app.commandLine.appendSwitch('no-user-gesture-required');
 
 let mainWindow: BrowserWindow | null | undefined;
 let tray: Tray | undefined;
+let bt: FeatherBluetoothService | undefined;
 
-app.dock.hide();
+app.dock?.hide();
 
 function createMainWindow(): BrowserWindow {
   const window = new BrowserWindow({
@@ -26,9 +29,14 @@ function createMainWindow(): BrowserWindow {
 
   window.loadURL(getAssetURL('index.html'));
 
+  bt!.onStateChange = (state) => {
+    window.webContents.send(IPC_CHANNEL.BluetoothStateUpdate, state);
+  };
+
   window.on('closed', (): void => {
+    bt!.onStateChange = undefined;
     mainWindow = null;
-    app.dock.hide();
+    app.dock?.hide();
   });
 
   window.webContents.on('devtools-opened', (): void => {
@@ -38,27 +46,13 @@ function createMainWindow(): BrowserWindow {
     });
   });
 
-  window.webContents.on(
-    'select-bluetooth-device',
-    (event, deviceList, callback) => {
-      event.preventDefault();
-      const result = deviceList.find((device) => {
-        return device.deviceName?.toLocaleLowerCase()?.includes('emily');
-      });
-      if (!result) {
-        callback('');
-      } else {
-        callback(result.deviceId);
-      }
-    },
-  );
-
-  app.dock.show();
+  app.dock?.show();
   return window;
 }
 
 // create main BrowserWindow when electron is ready
 app.on('ready', (): void => {
+  bt = new FeatherBluetoothService();
   tray = new Tray(nativeIconSmall);
 
   const show = () => {
@@ -108,4 +102,8 @@ ipcMain.on(IPC_CHANNEL.MSALLogOutRequest, async (ev) => {
   } finally {
     ev.reply(IPC_CHANNEL.MSALLogOutRequestComplete);
   }
+});
+
+ipcMain.on('log', (e, data) => {
+  console.log(data);
 });

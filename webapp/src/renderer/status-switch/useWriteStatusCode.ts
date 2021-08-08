@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { BLE_CHR_STATUS_CODE, BLE_SERVICE_STATUS } from '../util/constants';
+import { BLE_CHR_STATUS_CODE, BLE_SERVICE_STATUS } from '../constants';
 import { StatusCode } from '../util/statusCode';
 
 export const useWriteStatusCode = (gatt: BluetoothRemoteGATTServer) => {
