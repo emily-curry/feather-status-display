@@ -1,48 +1,73 @@
-import React, { useState, useCallback, FormEvent, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
+import { BluetoothDeviceState } from '../state';
 import { StatusPicker } from '../status-picker/StatusPicker';
 import { StatusCode } from '../util/statusCode';
-import { useFeatherGatt } from '../util/useFeatherDevice';
+import { useFeatherControl } from '../util/useFeatherDevice';
 import './ImageWriter.css';
-import { useReadFile } from './useReadFile';
-import { useWriteFile } from './useWriteFile';
-
 export const ImageWriter: React.FC = () => {
-  const gatt = useFeatherGatt();
-  return gatt?.connected ? <_ImageWriter gatt={gatt} /> : <></>;
+  const { state, writeImage } = useFeatherControl();
+  return state?.device ? (
+    <_ImageWriter
+      device={state.device}
+      isLoading={state.isLoading}
+      writeImage={writeImage}
+    />
+  ) : (
+    <></>
+  );
 };
 
-const _ImageWriter: React.FC<{ gatt: BluetoothRemoteGATTServer }> = (props) => {
-  const readFile = useReadFile();
-  const writeFile = useWriteFile(props.gatt);
+const _ImageWriter: React.FC<{
+  device: BluetoothDeviceState;
+  isLoading: boolean;
+  writeImage: (code: StatusCode, filePath: string) => Promise<void>;
+}> = ({ device, isLoading, writeImage }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [file, setFile] = useState<File | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
   const [statusCode, setStatusCode] = useState<StatusCode | undefined>(
     undefined,
   );
+  const [showHelp, setShowHelp] = useState(false);
 
-  const handleSubmit = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault();
-      const exec = async () => {
-        if (!file || statusCode === undefined) return;
-        setIsLoading(true);
-        try {
-          const parsed = await readFile(file);
-          await writeFile(parsed, statusCode);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      exec();
-    },
-    [file, setIsLoading, readFile, writeFile, statusCode],
-  );
+  const handleSubmit = useCallback(async () => {
+    if (!file || statusCode === undefined) return;
+    await writeImage(statusCode, file.path);
+  }, [file, writeImage, statusCode]);
+
+  const handleHelpClick = useCallback(() => {
+    setShowHelp(!showHelp);
+  }, [showHelp, setShowHelp]);
+
+  const handleMapFileClick = useCallback(async () => {
+    let a: HTMLAnchorElement | undefined;
+    let url: string | undefined;
+    try {
+      const res = await fetch('/eink-4gray.png');
+      const blob = await res.blob();
+      a = document.createElement('a');
+      url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = 'eink-4gray.png';
+      document.body.append(a);
+      a.click();
+    } finally {
+      if (url) URL.revokeObjectURL(url);
+      if (a) document.body.removeChild(a);
+    }
+  }, []);
 
   return (
     <div>
-      <h2>Image Writer</h2>
-      <form id="image-writer-form" onSubmit={handleSubmit}>
+      <h2>
+        Image Writer <button onClick={handleHelpClick}>?</button>
+      </h2>
+      {showHelp && (
+        <div id="image-writer-help">
+          <input value={helpString} readOnly></input>
+          <button onClick={handleMapFileClick}>map file</button>
+        </div>
+      )}
+      <div id="image-writer-form">
         <div className="flex-between">
           <label>Status: </label>
           <StatusPicker
@@ -58,7 +83,7 @@ const _ImageWriter: React.FC<{ gatt: BluetoothRemoteGATTServer }> = (props) => {
           </button>
         </div>
         <button
-          type="submit"
+          onClick={handleSubmit}
           disabled={isLoading || statusCode === undefined || file === undefined}
         >
           Update
@@ -69,7 +94,10 @@ const _ImageWriter: React.FC<{ gatt: BluetoothRemoteGATTServer }> = (props) => {
           disabled={isLoading}
           onChange={(e) => setFile(e.target?.files?.[0])}
         />
-      </form>
+      </div>
     </div>
   );
 };
+
+const helpString =
+  'convert input.bmp -dither FloydSteinberg -define dither:diffusion-amount=85% -remap eink-4gray.png -type truecolor BMP3:output.bmp';

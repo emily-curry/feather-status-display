@@ -16,6 +16,7 @@ export interface FeatherContextControl {
   disconnect: () => Promise<void>;
   refreshStatusCode: () => Promise<void>;
   writeStatusCode: (code: StatusCode) => Promise<void>;
+  writeImage: (code: StatusCode, filePath: string) => Promise<void>;
   state: BluetoothState;
 }
 
@@ -29,6 +30,7 @@ export const FeatherProvider: React.FC = (props) => {
       setBtState(data);
     };
     ipcRenderer.on(IPC_CHANNEL.BluetoothStateUpdate, handler);
+    ipcRenderer.send(IPC_CHANNEL.BluetoothStateUpdateRequest);
     return () => {
       ipcRenderer.off(IPC_CHANNEL.BluetoothStateUpdate, handler);
     };
@@ -58,6 +60,10 @@ export const FeatherProvider: React.FC = (props) => {
     ipcRenderer.send(IPC_CHANNEL.BluetoothStatusCodeWriteRequest, code);
   }, []);
 
+  const writeImage = useCallback(async (code: StatusCode, filePath: string) => {
+    ipcRenderer.send(IPC_CHANNEL.BluetoothImageWriteRequest, code, filePath);
+  }, []);
+
   const value = useMemo(() => {
     return {
       state: btState,
@@ -65,8 +71,16 @@ export const FeatherProvider: React.FC = (props) => {
       disconnect,
       refreshStatusCode,
       writeStatusCode,
+      writeImage,
     };
-  }, [btState, connect, disconnect, refreshStatusCode, writeStatusCode]);
+  }, [
+    btState,
+    connect,
+    disconnect,
+    refreshStatusCode,
+    writeStatusCode,
+    writeImage,
+  ]);
 
   return (
     <FeatherContext.Provider value={value}>

@@ -23,6 +23,7 @@ export enum IPC_CHANNEL {
   BluetoothDisconnectRequestComplete = 'BluetoothDisconnectRequestComplete',
   BluetoothStatusCodeRefreshRequest = 'BluetoothStatusCodeRefreshRequest',
   BluetoothStatusCodeWriteRequest = 'BluetoothStatusCodeWriteRequest',
+  BluetoothImageWriteRequest = 'BluetoothImageWriteRequest',
 
   /** Following block is main <-> worker */
   BluetoothWorkerConnectRequest = 'BluetoothWorkerConnectRequest',
@@ -34,5 +35,7 @@ export enum IPC_CHANNEL {
   BluetoothWorkerStatusRefreshRequest = 'BluetoothWorkerStatusRefreshRequest',
   BluetoothWorkerStatusRefreshRequestComplete = 'BluetoothWorkerStatusRefreshRequestComplete',
   BluetoothWorkerStatusUpdate = 'BluetoothWorkerStatusUpdate',
+  BluetoothWorkerImageWriteRequest = 'BluetoothWorkerImageWriteRequest',
+  BluetoothWorkerImageWriteRequestComplete = 'BluetoothWorkerImageWriteRequestComplete',
   BluetoothWorkerReset = 'BluetoothWorkerReset',
 }

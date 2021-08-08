@@ -4,6 +4,7 @@ import { IpcMainEvent } from 'electron/main';
 import { IPC_CHANNEL } from '../renderer/channel';
 import { BluetoothState } from '../renderer/state';
 import { StatusCode } from '../renderer/util/statusCode';
+import { readFile } from 'fs/promises';
 
 const setLoading = (loading: boolean) =>
   ({ type: 'set loading', loading } as const);
@@ -64,7 +65,7 @@ const bluetoothReducer = (
 };
 
 export class FeatherBluetoothService {
-  public onStateChange?: (state: BluetoothState) => void;
+  private onStateChange?: (state: BluetoothState) => void;
   private state: BluetoothState = bluetoothReducer();
   private window: BrowserWindow = new BrowserWindow({
     show: false,
@@ -91,6 +92,7 @@ export class FeatherBluetoothService {
       IPC_CHANNEL.BluetoothStatusCodeWriteRequest,
       this.onWriteStatusCode,
     );
+    ipcMain.on(IPC_CHANNEL.BluetoothImageWriteRequest, this.onWriteImage);
     // worker
     ipcMain.on(IPC_CHANNEL.BluetoothWorkerNameUpdate, (e, name) =>
       this.dispatch(setDeviceName(name)),
@@ -106,6 +108,11 @@ export class FeatherBluetoothService {
       'select-bluetooth-device',
       this.onSelectBluetoothDevice,
     );
+  }
+
+  public setOnStateChange(handler?: (state: BluetoothState) => void) {
+    this.onStateChange = handler;
+    handler?.(this.state);
   }
 
   private dispatch(action: Action) {
@@ -173,6 +180,28 @@ export class FeatherBluetoothService {
       this.window.webContents.send(
         IPC_CHANNEL.BluetoothWorkerStatusWriteRequest,
         code,
+      );
+      await p;
+    } finally {
+      this.dispatch(setLoading(false));
+    }
+  };
+
+  private readonly onWriteImage = async (
+    event: IpcMainEvent,
+    code: StatusCode,
+    filePath: string,
+  ) => {
+    this.dispatch(setLoading(true));
+    try {
+      const buf = await readFile(filePath);
+      const p = new Promise((r) =>
+        ipcMain.once(IPC_CHANNEL.BluetoothWorkerImageWriteRequestComplete, r),
+      );
+      this.window.webContents.send(
+        IPC_CHANNEL.BluetoothWorkerImageWriteRequest,
+        code,
+        buf,
       );
       await p;
     } finally {

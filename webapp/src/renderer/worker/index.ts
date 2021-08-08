@@ -4,6 +4,8 @@ import {
   BLE_SERVICE_STATUS,
   BLE_SERVICE_IMAGE,
   BLE_CHR_STATUS_CODE,
+  BLE_CHR_IMAGE_CONTROL,
+  BLE_CHR_IMAGE_WRITER,
 } from '../constants';
 import { StatusCode } from '../util/statusCode';
 const { ipcRenderer } = require('electron');
@@ -61,7 +63,6 @@ const updateStatusCode = async (g: BluetoothRemoteGATTServer) => {
   const svc = await g.getPrimaryService(BLE_SERVICE_STATUS);
   const chr = await svc.getCharacteristic(BLE_CHR_STATUS_CODE);
   const setCode = (value?: number) => {
-    ipcRenderer.send('log', `notify status ${value}`);
     ipcRenderer.send(IPC_CHANNEL.BluetoothWorkerStatusUpdate, value);
   };
   const callback = (ev: any) => {
@@ -114,6 +115,42 @@ const onWriteStatusCode = async (e: IpcRendererEvent, code: StatusCode) => {
   }
 };
 
+const onWriteImage = async (
+  e: IpcRendererEvent,
+  code: StatusCode,
+  buf: ArrayBuffer,
+) => {
+  try {
+    if (!gatt) return;
+    const imageService = await gatt.getPrimaryService(BLE_SERVICE_IMAGE);
+    const controlChr = await imageService.getCharacteristic(
+      BLE_CHR_IMAGE_CONTROL,
+    );
+    // Initiate write to status code
+    await controlChr.writeValueWithResponse(new Uint8Array([1, code]));
+
+    try {
+      const writerChr = await imageService.getCharacteristic(
+        BLE_CHR_IMAGE_WRITER,
+      );
+      for (let offset = 0; offset < buf.byteLength; offset += 508) {
+        const offsetArray = new Uint32Array([offset]);
+        const view = new Uint8Array(
+          buf.slice(offset, Math.min(offset + 508, buf.byteLength)),
+        );
+        const data = new Uint8Array(offsetArray.byteLength + view.byteLength);
+        data.set(new Uint8Array(offsetArray.buffer), 0);
+        data.set(view, offsetArray.byteLength);
+        await writerChr.writeValueWithResponse(data);
+      }
+    } finally {
+      await controlChr.writeValueWithResponse(new Uint8Array([2]));
+    }
+  } finally {
+    ipcRenderer.send(IPC_CHANNEL.BluetoothWorkerImageWriteRequestComplete);
+  }
+};
+
 ipcRenderer.on(IPC_CHANNEL.BluetoothWorkerReset, reset);
 ipcRenderer.on(
   IPC_CHANNEL.BluetoothWorkerStatusRefreshRequest,
@@ -123,6 +160,7 @@ ipcRenderer.on(
   IPC_CHANNEL.BluetoothWorkerStatusWriteRequest,
   onWriteStatusCode,
 );
+ipcRenderer.on(IPC_CHANNEL.BluetoothWorkerImageWriteRequest, onWriteImage);
 
 // Can only be triggered by "user gesture"
 window.addEventListener('keydown', onRequestDevice);

@@ -13,3 +13,12 @@
   visibility: hidden;
   position: absolute;
 }
+
+#image-writer-help {
+  display: flex;
+}
+
+#image-writer-help input {
+  flex: 1;
+  box-sizing: border-box;
+}

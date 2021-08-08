@@ -29,12 +29,12 @@ function createMainWindow(): BrowserWindow {
 
   window.loadURL(getAssetURL('index.html'));
 
-  bt!.onStateChange = (state) => {
+  bt!.setOnStateChange((state) => {
     window.webContents.send(IPC_CHANNEL.BluetoothStateUpdate, state);
-  };
+  });
 
   window.on('closed', (): void => {
-    bt!.onStateChange = undefined;
+    bt!.setOnStateChange(undefined);
     mainWindow = null;
     app.dock?.hide();
   });
