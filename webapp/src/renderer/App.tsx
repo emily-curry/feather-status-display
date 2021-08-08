@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css';
 import { DeviceManager } from './device-manager/DeviceManager';
 import { MsSync } from './ms-sync/MsSync';
+import { StatusSwitch } from './status-switch/StatusSwitch';
 import { FeatherProvider } from './util/useFeatherDevice';
 import { GraphClientProvider } from './util/useGraphClient';
 
@@ -11,8 +12,8 @@ const App: React.FC = () => {
       <FeatherProvider>
         <div className="App">
           <DeviceManager />
-          {/* <StatusSwitch />
-          <ImageWriter /> */}
+          <StatusSwitch />
+          {/* <ImageWriter /> */}
           <MsSync />
         </div>
       </FeatherProvider>

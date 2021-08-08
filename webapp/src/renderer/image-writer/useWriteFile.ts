@@ -1,24 +1,24 @@
 import { useCallback } from 'react';
 import {
-  UUID16_CHR_IMAGE_CONTROL,
-  UUID16_CHR_IMAGE_WRITER,
-  UUID16_SVC_IMAGE,
+  BLE_CHR_IMAGE_CONTROL,
+  BLE_CHR_IMAGE_WRITER,
+  BLE_SERVICE_IMAGE,
 } from '../constants';
 import { StatusCode } from '../util/statusCode';
 
 export const useWriteFile = (gatt: BluetoothRemoteGATTServer) => {
   return useCallback(
     async (file: ArrayBuffer, code: StatusCode): Promise<void> => {
-      const imageService = await gatt.getPrimaryService(UUID16_SVC_IMAGE);
+      const imageService = await gatt.getPrimaryService(BLE_SERVICE_IMAGE);
       const controlChr = await imageService.getCharacteristic(
-        UUID16_CHR_IMAGE_CONTROL,
+        BLE_CHR_IMAGE_CONTROL,
       );
       // Initiate write to status code
       await controlChr.writeValueWithResponse(new Uint8Array([1, code]));
 
       try {
         const writerChr = await imageService.getCharacteristic(
-          UUID16_CHR_IMAGE_WRITER,
+          BLE_CHR_IMAGE_WRITER,
         );
         for (let offset = 0; offset < file.byteLength; offset += 508) {
           const offsetArray = new Uint32Array([offset]);

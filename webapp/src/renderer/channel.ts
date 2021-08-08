@@ -1,3 +1,5 @@
+import { BluetoothState } from './state';
+
 export enum IPC_CHANNEL {
   /** Indicates that the MSAL log in flow should be initiated. renderer -> main */
   MSALLogInRequest = 'MSALLogInRequest',
@@ -12,16 +14,25 @@ export enum IPC_CHANNEL {
   /** Indicates the state of "activity" from the graph client has changed. main -> renderer */
   GraphGetActivityUpdate = 'GraphGetActivityUpdate',
 
+  /** Following block is main <-> renderer */
   BluetoothStateUpdate = 'BluetoothStateUpdate',
   BluetoothStateUpdateRequest = 'BluetoothStateUpdateRequest',
   BluetoothDeviceRequest = 'BluetoothDeviceRequest',
   BluetoothDeviceRequestComplete = 'BluetoothDeviceRequestComplete',
   BluetoothDisconnectRequest = 'BluetoothDisconnectRequest',
   BluetoothDisconnectRequestComplete = 'BluetoothDisconnectRequestComplete',
+  BluetoothStatusCodeRefreshRequest = 'BluetoothStatusCodeRefreshRequest',
+  BluetoothStatusCodeWriteRequest = 'BluetoothStatusCodeWriteRequest',
 
+  /** Following block is main <-> worker */
   BluetoothWorkerConnectRequest = 'BluetoothWorkerConnectRequest',
   BluetoothWorkerConnectRequestComplete = 'BluetoothWorkerConnectRequestComplete',
   BluetoothWorkerNameUpdate = 'BluetoothWorkerNameUpdate',
   BluetoothWorkerBatteryUpdate = 'BluetoothWorkerBatteryUpdate',
+  BluetoothWorkerStatusWriteRequest = 'BluetoothWorkerStatusWriteRequest',
+  BluetoothWorkerStatusWriteRequestComplete = 'BluetoothWorkerStatusWriteRequestComplete',
+  BluetoothWorkerStatusRefreshRequest = 'BluetoothWorkerStatusRefreshRequest',
+  BluetoothWorkerStatusRefreshRequestComplete = 'BluetoothWorkerStatusRefreshRequestComplete',
+  BluetoothWorkerStatusUpdate = 'BluetoothWorkerStatusUpdate',
   BluetoothWorkerReset = 'BluetoothWorkerReset',
 }

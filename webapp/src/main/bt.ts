@@ -1,9 +1,9 @@
 import { BrowserWindow, ipcMain } from 'electron';
+import { getAssetURL } from 'electron-snowpack';
 import { IpcMainEvent } from 'electron/main';
 import { IPC_CHANNEL } from '../renderer/channel';
-import { BLE_SERVICE_STATUS, UUID16_SVC_IMAGE } from '../renderer/constants';
 import { BluetoothState } from '../renderer/state';
-import { getAssetURL } from 'electron-snowpack';
+import { StatusCode } from '../renderer/util/statusCode';
 
 const setLoading = (loading: boolean) =>
   ({ type: 'set loading', loading } as const);
@@ -14,12 +14,16 @@ const setDeviceName = (name?: string) =>
 const setDeviceBattery = (battery?: number) =>
   ({ type: 'set device battery', battery } as const);
 
+const setDeviceStatusCode = (statusCode?: StatusCode) =>
+  ({ type: 'set device status code', statusCode } as const);
+
 const reset = () => ({ type: 'reset' } as const);
 
 type Action =
   | ReturnType<typeof setLoading>
   | ReturnType<typeof setDeviceName>
   | ReturnType<typeof setDeviceBattery>
+  | ReturnType<typeof setDeviceStatusCode>
   | ReturnType<typeof reset>;
 
 const initialState: BluetoothState = {
@@ -46,6 +50,11 @@ const bluetoothReducer = (
       const device = { ...state.device, battery: action.battery };
       return { ...state, device };
     }
+    case 'set device status code': {
+      if (!state.device) return state;
+      const device = { ...state.device, status: action.statusCode };
+      return { ...state, device };
+    }
     case 'reset': {
       return { ...initialState };
     }
@@ -67,17 +76,30 @@ export class FeatherBluetoothService {
   });
 
   constructor() {
+    // renderer
     ipcMain.on(IPC_CHANNEL.BluetoothStateUpdateRequest, this.onRequestUpdate);
     ipcMain.on(IPC_CHANNEL.BluetoothDeviceRequest, this.onRequestDevice);
     ipcMain.on(
       IPC_CHANNEL.BluetoothDisconnectRequest,
       this.onRequestDisconnect,
     );
+    ipcMain.on(
+      IPC_CHANNEL.BluetoothStatusCodeRefreshRequest,
+      this.onRefreshStatusCode,
+    );
+    ipcMain.on(
+      IPC_CHANNEL.BluetoothStatusCodeWriteRequest,
+      this.onWriteStatusCode,
+    );
+    // worker
     ipcMain.on(IPC_CHANNEL.BluetoothWorkerNameUpdate, (e, name) =>
       this.dispatch(setDeviceName(name)),
     );
     ipcMain.on(IPC_CHANNEL.BluetoothWorkerBatteryUpdate, (e, batt) => {
       this.dispatch(setDeviceBattery(batt));
+    });
+    ipcMain.on(IPC_CHANNEL.BluetoothWorkerStatusUpdate, (e, code) => {
+      this.dispatch(setDeviceStatusCode(code));
     });
     this.window.loadURL(getAssetURL('bt-worker.html'));
     this.window.webContents.on(
@@ -107,9 +129,7 @@ export class FeatherBluetoothService {
       const p = new Promise<boolean>((r) => {
         ipcMain.once(
           IPC_CHANNEL.BluetoothWorkerConnectRequestComplete,
-          (e, didConnect) => {
-            r(didConnect);
-          },
+          (e, didConnect) => r(didConnect),
         );
       });
       // Can only be triggered by "user gesture"
@@ -117,12 +137,45 @@ export class FeatherBluetoothService {
         type: 'keyDown',
         keyCode: '49',
       });
-      const didConnect = await p;
-      if (!didConnect) {
-        await this.reset();
-      }
     } finally {
       event.reply(IPC_CHANNEL.BluetoothDeviceRequestComplete);
+      this.dispatch(setLoading(false));
+    }
+  };
+
+  private readonly onRefreshStatusCode = async (event: IpcMainEvent) => {
+    this.dispatch(setLoading(true));
+    try {
+      const p = new Promise((r) =>
+        ipcMain.once(
+          IPC_CHANNEL.BluetoothWorkerStatusRefreshRequestComplete,
+          r,
+        ),
+      );
+      this.window.webContents.send(
+        IPC_CHANNEL.BluetoothWorkerStatusRefreshRequest,
+      );
+      await p;
+    } finally {
+      this.dispatch(setLoading(false));
+    }
+  };
+
+  private readonly onWriteStatusCode = async (
+    event: IpcMainEvent,
+    code: StatusCode,
+  ) => {
+    this.dispatch(setLoading(true));
+    try {
+      const p = new Promise((r) =>
+        ipcMain.once(IPC_CHANNEL.BluetoothWorkerStatusWriteRequestComplete, r),
+      );
+      this.window.webContents.send(
+        IPC_CHANNEL.BluetoothWorkerStatusWriteRequest,
+        code,
+      );
+      await p;
+    } finally {
       this.dispatch(setLoading(false));
     }
   };

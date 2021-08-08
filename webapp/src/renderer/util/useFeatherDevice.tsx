@@ -8,11 +8,14 @@ import React, {
 } from 'react';
 import { IPC_CHANNEL } from '../channel';
 import { BluetoothState } from '../state';
+import { StatusCode } from './statusCode';
 const { ipcRenderer } = require('electron');
 
 export interface FeatherContextControl {
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
+  refreshStatusCode: () => Promise<void>;
+  writeStatusCode: (code: StatusCode) => Promise<void>;
   state: BluetoothState;
 }
 
@@ -47,13 +50,23 @@ export const FeatherProvider: React.FC = (props) => {
     await p;
   }, []);
 
+  const refreshStatusCode = useCallback(async () => {
+    ipcRenderer.send(IPC_CHANNEL.BluetoothStatusCodeRefreshRequest);
+  }, []);
+
+  const writeStatusCode = useCallback(async (code: StatusCode) => {
+    ipcRenderer.send(IPC_CHANNEL.BluetoothStatusCodeWriteRequest, code);
+  }, []);
+
   const value = useMemo(() => {
     return {
       state: btState,
       connect,
       disconnect,
+      refreshStatusCode,
+      writeStatusCode,
     };
-  }, [btState, connect, disconnect]);
+  }, [btState, connect, disconnect, refreshStatusCode, writeStatusCode]);
 
   return (
     <FeatherContext.Provider value={value}>

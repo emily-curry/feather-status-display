@@ -1,3 +1,5 @@
+import { StatusCode } from './util/statusCode';
+
 export interface BluetoothState {
   isLoading: boolean;
   device?: BluetoothDeviceState;
@@ -6,6 +8,7 @@ export interface BluetoothState {
 export interface BluetoothDeviceState {
   battery?: number;
   name: string;
+  status?: StatusCode;
 }
 
 export interface GraphMeState {
